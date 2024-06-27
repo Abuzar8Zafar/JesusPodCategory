@@ -147,8 +147,7 @@ const AddCat = () => {
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
         title: value?.title,
-        imageUrl:
-          "https://firebasestorage.googleapis.com/v0/b/new-jesuspod.appspot.com/o/UserImages%2F1718001640682_AllNationsLogo.jpg?alt=media&token=29ad07db-6621-4c41-93c9-9e73f9d76d5e",
+        imageUrl: profileImage,
         url: value?.url,
         category: categoryData, // Including the full category object
         sub: [],
