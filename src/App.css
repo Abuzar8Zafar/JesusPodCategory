@@ -127,3 +127,7 @@ element {
   border-radius: 8px;
   padding-right: 2rem;
 }
+.skelton_main {
+  height: 100% !important;
+  line-height: inherit !important;
+}

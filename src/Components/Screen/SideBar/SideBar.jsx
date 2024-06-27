@@ -4,6 +4,7 @@ import { Col, Container, Row, Nav } from "react-bootstrap";
 import Tab from "react-bootstrap/Tab";
 import { FiHome } from "react-icons/fi";
 import { LuSearch } from "react-icons/lu";
+import { CiCircleList } from "react-icons/ci";
 import { HiOutlineSignal } from "react-icons/hi2";
 import { AiOutlineMenuFold } from "react-icons/ai";
 import { FaPlay } from "react-icons/fa6";
@@ -61,6 +62,11 @@ const SideBar = () => {
                       <Nav.Item>
                         <NavLink to={"/addCat"}>
                           <LuSearch /> Add Data
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/listCategory"}>
+                          <CiCircleList /> List Category
                         </NavLink>
                       </Nav.Item>
                     </Nav>

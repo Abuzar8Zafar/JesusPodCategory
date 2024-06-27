@@ -61,7 +61,7 @@ const Home = () => {
   };
   useEffect(() => {
     getCategories();
-  }, [""]);
+  }, []);
 
   // snackbar
 
@@ -103,7 +103,7 @@ const Home = () => {
       return docRef.id;
     } catch (error) {
       setLoading(false);
-      console.error("Error adding category:", error);
+      console.error("Error adding category", error);
       throw error;
     }
   };

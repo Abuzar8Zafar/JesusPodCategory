@@ -14,6 +14,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, firestore, storage } from "../../Firebase/Config";
 import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { Input as InputStrap } from "reactstrap";
+import { v4 as uuidv4 } from "uuid";
 
 import { useDispatch } from "react-redux";
 import {
@@ -22,9 +23,17 @@ import {
   setUser,
 } from "../../../Redux/Slices/AuthSlice";
 import { getSingleDoc } from "../../Firebase/FirbaseService";
-import { addDoc, collection, doc, getDoc, getDocs } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+} from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-
+import DataTable from "react-data-table-component";
+import ImageLoader from "../../ImageLoader/ImageLoader";
 const AddCat = () => {
   const [inputType, setInputType] = useState("password");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -36,6 +45,7 @@ const AddCat = () => {
   const [profileImage, setProfileImage] = useState("");
   const [SelectedImg, setSelectedImg] = useState("");
   const [Chanalsdata, setChanalsdata] = useState([]);
+  const [channelLoading, setChannelLoading] = useState(false);
 
   const getCategories = async () => {
     try {
@@ -85,8 +95,7 @@ const AddCat = () => {
 
   useEffect(() => {
     getCategories();
-    getChannelsWithCategories();
-  }, [""]);
+  }, []);
 
   const uploadImage = (courseFile) => {
     if (!courseFile) return;
@@ -129,18 +138,23 @@ const AddCat = () => {
       }
 
       const categoryData = categoryDoc.data();
+      const uniqueId = uuidv4();
 
       // Reference to the 'channels' collection
       const channelsCollection = collection(firestore, "Newchannels");
 
       // Add a new document with the channel details, including the category object
       const docRef = await addDoc(channelsCollection, {
+        _id: uniqueId,
         title: value?.title,
-        imageUrl: profileImage,
+        imageUrl:
+          "https://firebasestorage.googleapis.com/v0/b/new-jesuspod.appspot.com/o/UserImages%2F1718001640682_AllNationsLogo.jpg?alt=media&token=29ad07db-6621-4c41-93c9-9e73f9d76d5e",
         url: value?.url,
         category: categoryData, // Including the full category object
+        sub: [],
+        download: [],
+        star: [],
       });
-      getChannelsWithCategories();
       setLoading(false);
 
       return docRef.id;
@@ -151,23 +165,7 @@ const AddCat = () => {
     }
   };
 
-  const getChannelsWithCategories = async () => {
-    try {
-      // Reference to the 'channels' collection
-      const channelsCollection = collection(firestore, "Newchannels");
-      const channelsSnapshot = await getDocs(channelsCollection);
-      const channels = channelsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setChanalsdata(channels);
-    } catch (error) {
-      console.error("Error fetching channels with categories:", error);
-      throw error;
-    }
-  };
-
-  // handle submit
+  // /
 
   return (
     <>
@@ -288,7 +286,7 @@ const AddCat = () => {
 
                   <InputStrap
                     type="file"
-                    required
+                    // required
                     id="fileInput"
                     className="visually-hidden"
                     onChange={SelectImage}
@@ -298,7 +296,7 @@ const AddCat = () => {
 
               <div className="d-flex flex-column w-50">
                 <button
-                  disabled={loading && profileImage}
+                  disabled={loading}
                   className={`loginBtn mt-3 ${loading ? "disbalebtn" : ""}`}
                 >
                   {loading ? (
@@ -323,44 +321,6 @@ const AddCat = () => {
           </Form>
         )}
       </Formik>
-
-      <Table striped bordered hover className="mt-5" style={{ width: "70%" }}>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Image</th>
-            <th>Title</th>
-            <th>Cat Name</th>
-            <th>Feed Url</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {Chanalsdata.map((item, index) => (
-            <tr key={index}>
-              <td>{index}</td>
-              <td colSpan={1}>
-                <img
-                  src={item?.imageUrl}
-                  style={{ width: 40, height: 40, borderRadius: 50 }}
-                  alt=""
-                />
-              </td>
-              <td colSpan={1}>{item?.title}</td>
-              <td colSpan={1}>{item?.category?.name}</td>
-              <td colSpan={1}>{item?.url}</td>
-              <td colSpan={1}>
-                <button
-                  className="loginBtn2"
-                  style={{ cursor: "pointer", padding: "2px 10px" }}
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </Table>
     </>
   );
 };

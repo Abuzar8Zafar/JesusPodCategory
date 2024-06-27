@@ -701,3 +701,11 @@
   opacity: 0;
   height: 100%;
 }
+
+/* new css */
+
+.tableImg {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
