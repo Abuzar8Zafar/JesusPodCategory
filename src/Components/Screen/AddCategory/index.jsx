@@ -16,6 +16,10 @@ import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { Input as InputStrap } from "reactstrap";
 import { v4 as uuidv4 } from "uuid";
 
+import Snackbar, { SnackbarOrigin } from "@mui/material/Snackbar";
+
+import { message } from "antd";
+
 import { useDispatch } from "react-redux";
 import {
   setAuthenticated,
@@ -35,6 +39,12 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import DataTable from "react-data-table-component";
 import ImageLoader from "../../ImageLoader/ImageLoader";
 const AddCat = () => {
+  const [state, setState] = React.useState({
+    open: false,
+    vertical: "top",
+    horizontal: "center",
+  });
+
   const [inputType, setInputType] = useState("password");
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -104,6 +114,7 @@ const AddCat = () => {
     const imageRef = ref(storage, `UserImages/${uniqueFileName}`);
     uploadBytes(imageRef, courseFile).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
+        showSnackbar("Image Added Sucessfully", "success");
         setProfileImage(url);
       });
     });
@@ -154,6 +165,9 @@ const AddCat = () => {
         download: [],
         star: [],
       });
+
+      showSnackbar("Podcast Added Sucessfully", "success");
+
       setLoading(false);
 
       return docRef.id;
