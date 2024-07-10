@@ -39,11 +39,12 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import DataTable from "react-data-table-component";
 import ImageLoader from "../../ImageLoader/ImageLoader";
 const AddCat = () => {
-  const [state, setState] = React.useState({
-    open: false,
-    vertical: "top",
-    horizontal: "center",
-  });
+  const navigation = useNavigate();
+  // const [state, setState] = React.useState({
+  //   open: false,
+  //   vertical: "top",
+  //   horizontal: "center",
+  // });
 
   const [inputType, setInputType] = useState("password");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -56,6 +57,7 @@ const AddCat = () => {
   const [SelectedImg, setSelectedImg] = useState("");
   const [Chanalsdata, setChanalsdata] = useState([]);
   const [channelLoading, setChannelLoading] = useState(false);
+  const [loadingupload, setloadingupload] = useState(false);
 
   const getCategories = async () => {
     try {
@@ -109,6 +111,8 @@ const AddCat = () => {
 
   const uploadImage = (courseFile) => {
     if (!courseFile) return;
+    setloadingupload(true);
+
     const currentDate = new Date();
     const uniqueFileName = `${currentDate.getTime()}_${courseFile?.name}`;
     const imageRef = ref(storage, `UserImages/${uniqueFileName}`);
@@ -116,6 +120,7 @@ const AddCat = () => {
       getDownloadURL(snapshot.ref).then((url) => {
         showSnackbar("Image Added Sucessfully", "success");
         setProfileImage(url);
+        setloadingupload(false);
       });
     });
   };
@@ -165,6 +170,8 @@ const AddCat = () => {
         download: [],
         star: [],
       });
+
+      navigation("/listCategory");
 
       showSnackbar("Podcast Added Sucessfully", "success");
 
@@ -269,22 +276,44 @@ const AddCat = () => {
                 <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
                 <div>
                   <label
-                    style={{ cursor: "pointer" }}
+                    style={{ cursor: "pointer", position: "relative" }}
                     htmlFor="fileInput"
                     className="cursor-pointer"
                   >
-                    {SelectedImg ? (
-                      <img
-                        src={SelectedImg}
-                        alt="Preview"
+                    {loadingupload && (
+                      <Spinner
                         style={{
-                          width: "100px",
-                          height: "100px",
-                          objectFit: "cover",
-                          borderRadius: "50%",
+                          width: "18px",
+                          height: "18px",
+                          marginTop: "3px",
+                          borderWidth: "0.15em",
+                          position: "absolute",
+                          top: "1.5rem",
+                          right: "2rem",
+                          zIndex: "99999",
+                          color: "red",
                         }}
-                        className="object-cover"
-                      />
+                        animation="border"
+                        role="status"
+                      >
+                        <span className="visually-hidden">Loading...</span>
+                      </Spinner>
+                    )}
+                    {profileImage ? (
+                      <>
+                        <img
+                          src={profileImage}
+                          alt="Preview"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover",
+                            borderRadius: "50%",
+                            position: "relative",
+                          }}
+                          className="object-cover"
+                        />
+                      </>
                     ) : (
                       <div className="border radius_50 flex justify-content-center items-center">
                         <img
