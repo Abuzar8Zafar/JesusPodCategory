@@ -65,6 +65,11 @@ const SideBar = () => {
                         </NavLink>
                       </Nav.Item>
                       <Nav.Item>
+                        <NavLink to={"/AddRadio"}>
+                          <LuSearch /> Add Radio
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
                         <NavLink to={"/listCategory"}>
                           <CiCircleList /> List Category
                         </NavLink>

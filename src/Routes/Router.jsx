@@ -4,14 +4,16 @@ import { useRoutes, Navigate } from "react-router-dom";
 import Spinner from "react-bootstrap/Spinner";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../Redux/Slices/AuthSlice";
+import AddRadio from "../Components/Screen/AddCategory/AddRadio";
 
 const Home = lazy(() => import("../Components/Screen/Home/index"));
 const Auth = lazy(() => import("../Components/Screen/Auth/Auth"));
 
 const Login = lazy(() => import("../Components/Screen/Auth/authLogin"));
 const AddCat = lazy(() => import("../Components/Screen/AddCategory/index"));
-const ListCategory = lazy(() => import("../Components/Screen/AddCategory/ListCategory"));
-
+const ListCategory = lazy(() =>
+  import("../Components/Screen/AddCategory/ListCategory")
+);
 
 const Router = () => {
   const isAuthenticated = useSelector(selectIsAuthenticated);
@@ -47,6 +49,11 @@ const Router = () => {
         {
           path: "/listCategory",
           element: isAuthenticated ? <ListCategory /> : <Navigate to="/" />,
+        },
+
+        {
+          path: "/AddRadio",
+          element: isAuthenticated ? <AddRadio /> : <Navigate to="/" />,
         },
       ])}
     </Suspense>
