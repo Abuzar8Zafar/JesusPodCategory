@@ -5,6 +5,7 @@ import Spinner from "react-bootstrap/Spinner";
 import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../Redux/Slices/AuthSlice";
 import AddRadio from "../Components/Screen/AddCategory/AddRadio";
+import RadioList from "../Components/Screen/AddCategory/RadioList";
 
 const Home = lazy(() => import("../Components/Screen/Home/index"));
 const Auth = lazy(() => import("../Components/Screen/Auth/Auth"));
@@ -54,6 +55,10 @@ const Router = () => {
         {
           path: "/AddRadio",
           element: isAuthenticated ? <AddRadio /> : <Navigate to="/" />,
+        },
+        {
+          path: "/RadioList",
+          element: isAuthenticated ? <RadioList /> : <Navigate to="/" />,
         },
       ])}
     </Suspense>
