@@ -6,6 +6,11 @@ import { useSelector } from "react-redux";
 import { selectIsAuthenticated } from "../Redux/Slices/AuthSlice";
 import AddRadio from "../Components/Screen/AddCategory/AddRadio";
 import RadioList from "../Components/Screen/AddCategory/RadioList";
+import AddBanner from "../Components/Screen/AddCategory/AddBanner";
+import AddblogCategory from "../Components/Screen/AddCategory/AddblogCategory";
+import AddBogs from "../Components/Screen/AddCategory/AddBogs";
+import BlogList from "../Components/Screen/AddCategory/BlogList";
+import Bannerlist from "../Components/Screen/AddCategory/Bannerlist";
 
 const Home = lazy(() => import("../Components/Screen/Home/index"));
 const Auth = lazy(() => import("../Components/Screen/Auth/Auth"));
@@ -59,6 +64,26 @@ const Router = () => {
         {
           path: "/RadioList",
           element: isAuthenticated ? <RadioList /> : <Navigate to="/" />,
+        },
+        {
+          path: "/Adbanners",
+          element: isAuthenticated ? <AddBanner /> : <Navigate to="/" />,
+        },
+        {
+          path: "/AddBlogsCat",
+          element: isAuthenticated ? <AddblogCategory /> : <Navigate to="/" />,
+        },
+        {
+          path: "/AddBlog",
+          element: isAuthenticated ? <AddBogs /> : <Navigate to="/" />,
+        },
+        {
+          path: "/BlogList",
+          element: isAuthenticated ? <BlogList /> : <Navigate to="/" />,
+        },
+        {
+          path: "/Bannerlist",
+          element: isAuthenticated ? <Bannerlist /> : <Navigate to="/" />,
         },
       ])}
     </Suspense>

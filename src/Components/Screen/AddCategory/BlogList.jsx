@@ -26,7 +26,7 @@ import CustomSnackbar from "../../SnackBar/CustomSnackbar";
 import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-const RadioList = () => {
+const BlogList = () => {
   const [channelLoading, setChannelLoading] = useState(false);
   const [Chanalsdata, setChanalsdata] = useState([]);
   const [Editmodal, setEditmodal] = useState(false);
@@ -43,10 +43,36 @@ const RadioList = () => {
   const [Rowdata, setRowdata] = useState("");
   const [loadingupload, setloadingupload] = useState(false);
 
+  const getCategories = async () => {
+    try {
+      // Reference to the 'category' collection
+      const categoryCollection = collection(
+        firestore,
+        "BlogCategoryCollection"
+      );
+
+      // Fetch all documents in the collection
+      const categorySnapshot = await getDocs(categoryCollection);
+
+      // Extract data from each document
+      const categories = categorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Log and return the categories
+      setCat(categories);
+      return categories;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      throw error;
+    }
+  };
+
   const getChannelsWithCategories = async () => {
     setChannelLoading(true);
     try {
-      const channelsCollection = collection(firestore, "Radio");
+      const channelsCollection = collection(firestore, "BlogCollection");
       const channelsSnapshot = await getDocs(channelsCollection);
       const channels = channelsSnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -61,50 +87,24 @@ const RadioList = () => {
     }
   };
 
-  const uploadImage = (courseFile) => {
-    if (!courseFile) return;
-    setloadingupload(true);
-    const currentDate = new Date();
-    const uniqueFileName = `${currentDate.getTime()}_${courseFile?.name}`;
-    const imageRef = ref(storage, `UserImages/${uniqueFileName}`);
-    uploadBytes(imageRef, courseFile).then((snapshot) => {
-      getDownloadURL(snapshot.ref).then((url) => {
-        showSnackbar("Image Added Sucessfully", "success");
-        setProfileImage(url);
-        setloadingupload(false);
-      });
-    });
-  };
-
-  const SelectImage = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setSelectedImg(reader.result);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      setSelectedImg(null);
-    }
-    if (file) {
-      uploadImage(file);
-    }
+  const getCategoryIDByName = (name) => {
+    const category = Cat.find((category) => category.name === name);
+    return category?.id;
   };
 
   const initialValues = {
-    title: Rowdata?.title,
+    cat: getCategoryIDByName(Rowdata?.category?.name),
     url: Rowdata?.url,
   };
 
   const validationSchema = Yup.object().shape({
-    title: Yup.string().required("Title is required"),
+    cat: Yup.string().required("Category name is required"),
     url: Yup.string().required("Feed url is required"),
   });
 
   const handleDelete = async (id) => {
     try {
-      const channelRef = collection(firestore, "Radio");
+      const channelRef = collection(firestore, "BlogCollection");
       await deleteDoc(doc(channelRef, id));
       // After deletion, refresh data
       getChannelsWithCategories();
@@ -116,24 +116,38 @@ const RadioList = () => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Reference to the 'Radio' collection
-      const radioCollection = collection(firestore, "Radio");
+      // Fetch the category object by categoryId
+      const categoryDocRef = doc(
+        firestore,
+        "BlogCategoryCollection",
+        values?.cat
+      );
+      const categoryDoc = await getDoc(categoryDocRef);
+
+      if (!categoryDoc.exists()) {
+        setLoading(false);
+        throw new Error("Category not found");
+      }
+
+      const categoryData = categoryDoc.data();
+
+      // Reference to the 'channels' collection
+      const channelsCollection = collection(firestore, "BlogCollection");
 
       let docRef;
 
       if (RowID) {
-        // Update the existing document in the 'Radio' collection
-        docRef = doc(firestore, "Radio", RowID);
+        // Update the existing document
+        docRef = doc(firestore, "BlogCollection", RowID);
         await updateDoc(docRef, {
-          title: values?.title, // Update title
-          imageUrl: profileImage, // Update imageUrl
-          url: values?.url, // Update url
-          sub: [], // Update sub array
-          download: [], // Update download array
-          star: [], // Update star array
-          // No category field
+          url: values?.url,
+          category: categoryData,
+          sub: [],
+          download: [],
+          star: [],
         });
         setEditmodal(false);
+        getChannelsWithCategories();
         showSnackbar("Podcast Updated Successfully", "success");
       }
 
@@ -164,6 +178,7 @@ const RadioList = () => {
 
   useEffect(() => {
     getChannelsWithCategories();
+    getCategories();
   }, []);
 
   const columns = [
@@ -173,29 +188,12 @@ const RadioList = () => {
       maxWidth: "7rem",
       minWidth: "2rem",
     },
-    {
-      name: "Image",
-      selector: (row) => (
-        <ImageLoader
-          classes={"tableImg"}
-          imageUrl={row?.imageUrl}
-          circeltrue={true}
-        />
-      ),
-      maxWidth: "7rem",
-      minWidth: "2rem",
-    },
-    {
-      name: "Title",
-      selector: (row) => row?.title,
-      maxWidth: "10rem",
-      minWidth: "4rem",
-    },
+
     {
       name: "Cat Name",
       selector: (row) => row?.category?.name,
-      maxWidth: "7rem",
-      minWidth: "2rem",
+      maxWidth: "10rem",
+      minWidth: "7rem",
     },
     {
       name: "Feed Url",
@@ -239,13 +237,7 @@ const RadioList = () => {
         severity={snackbarSeverity}
         onClose={handleSnackbarClose}
       />
-      <Modal
-        title="Edit Radio"
-        footer={false}
-        open={Editmodal}
-        centered
-        onCancel={handleCancel}
-      >
+      <Modal footer={false} open={Editmodal} centered onCancel={handleCancel}>
         <Formik
           initialValues={initialValues}
           enableReinitialize={true}
@@ -272,17 +264,24 @@ const RadioList = () => {
                   className="mb-2 hideFocus2"
                   controlId="formGroupEmail"
                 >
-                  <Form.Label className="lableHead mt-3">Add Title</Form.Label>
+                  <Form.Label className="lableHead">Eidt Blog</Form.Label>
 
-                  <Form.Control
-                    className="radius_12 "
-                    placeholder="Title"
-                    name="title"
-                    value={values.title}
+                  <Form.Select
+                    aria-label="Default select example"
+                    className="radius_12"
+                    name="cat"
+                    value={values.cat}
                     onChange={handleChange}
-                  />
-                  {touched.title && errors.title && (
-                    <div className="errorMsg">{errors.title}</div>
+                  >
+                    {Cat.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </Form.Select>
+
+                  {touched.cat && errors.cat && (
+                    <div className="errorMsg">{errors.cat}</div>
                   )}
 
                   <Form.Label className="lableHead mt-3">
@@ -299,70 +298,6 @@ const RadioList = () => {
                     <div className="errorMsg">{errors.url}</div>
                   )}
                 </Form.Group>
-
-                <div className="d-flex " style={{ flexDirection: "column" }}>
-                  <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
-                  <div>
-                    <label
-                      style={{ cursor: "pointer", position: "relative" }}
-                      htmlFor="fileInput"
-                      className="cursor-pointer"
-                    >
-                      {loadingupload && (
-                        <Spinner
-                          style={{
-                            width: "18px",
-                            height: "18px",
-                            marginTop: "3px",
-                            borderWidth: "0.15em",
-                            position: "absolute",
-                            top: "2rem",
-                            right: "2.5rem",
-                            zIndex: "99999",
-                            color: "white",
-                          }}
-                          animation="border"
-                          role="status"
-                        >
-                          <span className="visually-hidden">Loading...</span>
-                        </Spinner>
-                      )}
-                      {profileImage ? (
-                        <>
-                          <img
-                            src={profileImage}
-                            alt="Preview"
-                            style={{
-                              width: "100px",
-                              height: "100px",
-                              objectFit: "cover",
-                              borderRadius: "50%",
-                              position: "relative",
-                            }}
-                            className="object-cover"
-                          />
-                        </>
-                      ) : (
-                        <div className="border radius_50 flex justify-content-center items-center">
-                          <img
-                            src={fileavatar}
-                            alt="Camera Icon"
-                            width={80}
-                            height={80}
-                          />
-                        </div>
-                      )}
-                    </label>
-
-                    <InputStrap
-                      type="file"
-                      // required
-                      id="fileInput"
-                      className="visually-hidden"
-                      onChange={SelectImage}
-                    />
-                  </div>
-                </div>
 
                 <div className="d-flex flex-column w-50">
                   <button
@@ -415,4 +350,4 @@ const RadioList = () => {
   );
 };
 
-export default RadioList;
+export default BlogList;

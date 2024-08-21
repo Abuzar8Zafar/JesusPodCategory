@@ -3,6 +3,8 @@ import { React, useState, useEffect } from "react";
 import { Col, Container, Row, Nav } from "react-bootstrap";
 import Tab from "react-bootstrap/Tab";
 import { FiHome } from "react-icons/fi";
+import { FiPlus } from "react-icons/fi";
+
 import { LuSearch } from "react-icons/lu";
 import { CiCircleList } from "react-icons/ci";
 import { HiOutlineSignal } from "react-icons/hi2";
@@ -61,7 +63,7 @@ const SideBar = () => {
                       </Nav.Item>
                       <Nav.Item>
                         <NavLink to={"/addCat"}>
-                          <LuSearch /> Add Data
+                          <FiPlus /> Add Data
                         </NavLink>
                       </Nav.Item>
                       <Nav.Item>
@@ -71,12 +73,38 @@ const SideBar = () => {
                       </Nav.Item>
                       <Nav.Item>
                         <NavLink to={"/AddRadio"}>
-                          <LuSearch /> Add Radio
+                          <FiPlus />
+                          Add Radio
                         </NavLink>
                       </Nav.Item>
                       <Nav.Item>
                         <NavLink to={"/RadioList"}>
                           <CiCircleList /> Radio List
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/AddBlogsCat"}>
+                          <FiPlus /> Add Blog Category
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/AddBlog"}>
+                          <FiPlus /> Add Blogs
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/BlogList"}>
+                          <CiCircleList /> BlogList
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/Adbanners"}>
+                          <FiPlus /> Add Banners
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/Bannerlist"}>
+                          <FiPlus /> Banner list
                         </NavLink>
                       </Nav.Item>
                     </Nav>
