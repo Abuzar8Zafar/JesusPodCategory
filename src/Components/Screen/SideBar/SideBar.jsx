@@ -107,6 +107,32 @@ const SideBar = () => {
                           <FiPlus /> Banner list
                         </NavLink>
                       </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/addchannels"}>
+                          <FiPlus /> Add Channels
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/ChannelList"}>
+                          <CiCircleList /> ChannelList
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/AddBooks"}>
+                          <FiPlus /> Add Books
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/BookList"}>
+                          <CiCircleList /> Book list
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/Sendnotifications"}>
+                          <CiCircleList />
+                          Send Notifications
+                        </NavLink>
+                      </Nav.Item>
                     </Nav>
                   </section>
                 </Col>

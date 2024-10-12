@@ -1,6 +1,6 @@
 // firebaseFunctions.js
 import { firestore, auth } from "./Config";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, addDoc, collection } from "firebase/firestore";
 
 export const saveDoc = async (uid, data, collection) => {
   try {

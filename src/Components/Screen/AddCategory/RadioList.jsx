@@ -94,11 +94,13 @@ const RadioList = () => {
 
   const initialValues = {
     title: Rowdata?.title,
+    category: Rowdata?.category,
     url: Rowdata?.url,
   };
 
   const validationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
+    category: Yup.string().required("Category is required"),
     url: Yup.string().required("Feed url is required"),
   });
 
@@ -127,6 +129,7 @@ const RadioList = () => {
         await updateDoc(docRef, {
           title: values?.title, // Update title
           imageUrl: profileImage, // Update imageUrl
+          category: values?.category,
           url: values?.url, // Update url
           sub: [], // Update sub array
           download: [], // Update download array
@@ -193,7 +196,7 @@ const RadioList = () => {
     },
     {
       name: "Cat Name",
-      selector: (row) => row?.category?.name,
+      selector: (row) => row?.category,
       maxWidth: "7rem",
       minWidth: "2rem",
     },
@@ -283,6 +286,21 @@ const RadioList = () => {
                   />
                   {touched.title && errors.title && (
                     <div className="errorMsg">{errors.title}</div>
+                  )}
+
+                  <Form.Label className="lableHead mt-3">
+                    Add Category
+                  </Form.Label>
+
+                  <Form.Control
+                    className="radius_12 "
+                    placeholder="Category"
+                    name="category"
+                    value={values.category}
+                    onChange={handleChange}
+                  />
+                  {touched.category && errors.category && (
+                    <div className="errorMsg">{errors.category}</div>
                   )}
 
                   <Form.Label className="lableHead mt-3">

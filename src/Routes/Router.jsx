@@ -11,6 +11,11 @@ import AddblogCategory from "../Components/Screen/AddCategory/AddblogCategory";
 import AddBogs from "../Components/Screen/AddCategory/AddBogs";
 import BlogList from "../Components/Screen/AddCategory/BlogList";
 import Bannerlist from "../Components/Screen/AddCategory/Bannerlist";
+import AddChannels from "../Components/Screen/AddCategory/AddChannels";
+import ChannelList from "../Components/Screen/AddCategory/ChannelList";
+import AddBook from "../Components/Screen/AddCategory/AddBook";
+import BookList from "../Components/Screen/AddCategory/BookList";
+import Sendnotifications from "../Components/Screen/AddCategory/Sendnotifications";
 
 const Home = lazy(() => import("../Components/Screen/Home/index"));
 const Auth = lazy(() => import("../Components/Screen/Auth/Auth"));
@@ -84,6 +89,30 @@ const Router = () => {
         {
           path: "/Bannerlist",
           element: isAuthenticated ? <Bannerlist /> : <Navigate to="/" />,
+        },
+        {
+          path: "/AddChannels",
+          element: isAuthenticated ? <AddChannels /> : <Navigate to="/" />,
+        },
+        {
+          path: "/ChannelList",
+          element: isAuthenticated ? <ChannelList /> : <Navigate to="/" />,
+        },
+        {
+          path: "/AddBooks",
+          element: isAuthenticated ? <AddBook /> : <Navigate to="/" />,
+        },
+        {
+          path: "/BookList",
+          element: isAuthenticated ? <BookList /> : <Navigate to="/" />,
+        },
+        {
+          path: "/Sendnotifications",
+          element: isAuthenticated ? (
+            <Sendnotifications />
+          ) : (
+            <Navigate to="/" />
+          ),
         },
       ])}
     </Suspense>

@@ -72,11 +72,13 @@ const AddRadio = () => {
 
   const initialValues = {
     title: "",
+    category: "",
     url: "",
   };
 
   const validationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
+    category: Yup.string().required("Category is required"),
     url: Yup.string().required("Feed url is required"),
   });
 
@@ -123,6 +125,7 @@ const AddRadio = () => {
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
         title: value?.title,
+        category: value?.category,
         imageUrl: profileImage,
         url: value?.url,
         sub: [],
@@ -190,6 +193,19 @@ const AddRadio = () => {
                 />
                 {touched.title && errors.title && (
                   <div className="errorMsg">{errors.title}</div>
+                )}
+
+                <Form.Label className="lableHead mt-3">Add Category</Form.Label>
+
+                <Form.Control
+                  className="radius_12 "
+                  placeholder="Category"
+                  name="category"
+                  value={values.category}
+                  onChange={handleChange}
+                />
+                {touched.category && errors.category && (
+                  <div className="errorMsg">{errors.category}</div>
                 )}
 
                 <Form.Label className="lableHead mt-3">
