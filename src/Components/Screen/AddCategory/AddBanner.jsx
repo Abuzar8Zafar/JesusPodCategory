@@ -19,6 +19,7 @@ import {
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import DataTable from "react-data-table-component";
 import ImageLoader from "../../ImageLoader/ImageLoader";
+import { Checkbox } from "antd";
 const AddBanner = () => {
   const navigation = useNavigate();
 
@@ -36,6 +37,26 @@ const AddBanner = () => {
   const [videoUrl, setvideoUrl] = useState("");
   const [SelectedVideo, setSelectedVideo] = useState("");
   const [PromoteUrl, setPromoteUrl] = useState("");
+  const [handVideoLink, sethandVideoLink] = useState("");
+
+  const [checked, setChecked] = useState(false);
+  const [disabled, setDisabled] = useState(false);
+
+  const toggleChecked = () => {
+    setChecked(!checked);
+  };
+
+  const toggleDisable = () => {
+    setDisabled(!disabled);
+  };
+
+  const onChange = (e) => {
+    setChecked(e.target.checked);
+  };
+
+  const handleVidoLinkChnage = (e) => {
+    sethandVideoLink(e.target.value); // Update the state with the new input value
+  };
 
   const handlePromoteUrlChange = (e) => {
     setPromoteUrl(e.target.value); // Update the state with the new input value
@@ -146,38 +167,19 @@ const AddBanner = () => {
     if (file) {
       uploadVideo(file);
     }
-
-    //   // Create a video element to check dimensions
-    //   const video = document.createElement("video");
-    //   video.src = URL.createObjectURL(file);
-
-    //   video.onloadedmetadata = () => {
-    //     const { videoWidth, videoHeight } = video;
-
-    //     if (videoWidth >= 1920 && videoHeight >= 1080) {
-    //       // Upload if dimensions are correct
-    //     } else {
-    //       alert("Video must be 1920x1080.");
-    //     }
-    //   };
-    // } else {
-    //   alert("Please select a video file.");
-    // }
   };
   const handleSubmit = async (value) => {
     setLoading(true);
     try {
       const uniqueId = uuidv4();
 
-      // Reference to the 'channels' collection
       const channelsCollection = collection(firestore, "BannersCollection");
 
-      // Add a new document with the channel details, including the category object
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
         imageUrl: profileImage,
         videoUrl: videoUrl,
-        PromoteUrl: PromoteUrl,
+        PromoteUrl: checked ? handVideoLink : PromoteUrl,
         download: [],
         star: [],
       });
@@ -293,35 +295,53 @@ const AddBanner = () => {
         </Form.Group>
 
         <div className="d-flex " style={{ flexDirection: "column" }}>
-          <h6 className="lableHead mt-2 mb-2">Upload Video Banner</h6>
-          <div>
-            <label
-              style={{ cursor: "pointer", position: "relative", width: "100%" }}
-              htmlFor="fileInput1"
-              className="cursor-pointer"
-            >
-              {loadinguploadVideo && (
-                <Spinner
+          <div
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <h6 className="lableHead mt-2 mb-2">Upload Video Banner</h6>
+            <Checkbox checked={checked} disabled={disabled} onChange={onChange}>
+              Add Video Link
+            </Checkbox>
+          </div>
+          {!checked ? (
+            <>
+              <div>
+                <label
                   style={{
-                    width: "18px",
-                    height: "18px",
-                    marginTop: "3px",
-                    borderWidth: "0.15em",
-                    position: "absolute",
-                    top: "1.5rem",
-                    right: "2rem",
-                    zIndex: "99999",
-                    color: "red",
+                    cursor: "pointer",
+                    position: "relative",
+                    width: "100%",
                   }}
-                  animation="border"
-                  role="status"
+                  htmlFor="fileInput1"
+                  className="cursor-pointer"
                 >
-                  <span className="visually-hidden">Loading...</span>
-                </Spinner>
-              )}
-              {videoUrl ? (
-                <>
-                  {/* <img
+                  {loadinguploadVideo && (
+                    <Spinner
+                      style={{
+                        width: "18px",
+                        height: "18px",
+                        marginTop: "3px",
+                        borderWidth: "0.15em",
+                        position: "absolute",
+                        top: "1.5rem",
+                        right: "2rem",
+                        zIndex: "99999",
+                        color: "red",
+                      }}
+                      animation="border"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </Spinner>
+                  )}
+                  {videoUrl ? (
+                    <>
+                      {/* <img
                     src={profileImage}
                     alt="Preview"
                     style={{
@@ -333,33 +353,45 @@ const AddBanner = () => {
                     }}
                     className="object-cover"
                   /> */}
-                  <video width="200" height="200" controls>
-                    <source src={videoUrl} type="video/mp4" />
-                  </video>
-                </>
-              ) : (
-                <div
-                  style={{ borderRadius: 10 }}
-                  className="border d-flex justify-content-center items-center"
-                >
-                  <img
-                    src={fileavatar}
-                    alt="Camera Icon"
-                    width={80}
-                    height={80}
-                  />
-                </div>
-              )}
-            </label>
+                      <video width="200" height="200" controls>
+                        <source src={videoUrl} type="video/mp4" />
+                      </video>
+                    </>
+                  ) : (
+                    <div
+                      style={{ borderRadius: 10 }}
+                      className="border d-flex justify-content-center items-center"
+                    >
+                      <img
+                        src={fileavatar}
+                        alt="Camera Icon"
+                        width={80}
+                        height={80}
+                      />
+                    </div>
+                  )}
+                </label>
 
-            <InputStrap
-              type="file"
-              // required
-              id="fileInput1"
-              className="visually-hidden"
-              onChange={SelectVideo}
-            />
-          </div>
+                <InputStrap
+                  type="file"
+                  // required
+                  id="fileInput1"
+                  className="visually-hidden"
+                  onChange={SelectVideo}
+                />
+              </div>
+            </>
+          ) : (
+            <Form.Group className="mb-2 hideFocus2" controlId="formGroupEmail">
+              <Form.Control
+                className="radius_12"
+                placeholder="Add Video Link"
+                name="cat"
+                value={handVideoLink}
+                onChange={handleVidoLinkChnage}
+              />
+            </Form.Group>
+          )}
         </div>
 
         <div className="d-flex flex-column w-50">

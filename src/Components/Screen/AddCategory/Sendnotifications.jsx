@@ -3,36 +3,16 @@ import { Form, Spinner } from "react-bootstrap";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import CustomSnackBar from "../../SnackBar/CustomSnackbar";
-import { addDoc, collection, getDocs } from "firebase/firestore";
 import { firestore } from "../../Firebase/Config";
 import axios from "axios";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { v4 as uuidv4 } from "uuid";
 
 const Sendnotifications = () => {
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
-  const [cat, setCat] = useState([]);
-
-  const getCategories = async () => {
-    try {
-      const categoryCollection = collection(firestore, "category");
-      const categorySnapshot = await getDocs(categoryCollection);
-      const categories = categorySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setCat(categories);
-      return categories;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw error;
-    }
-  };
-
-  useEffect(() => {
-    getCategories();
-  }, []);
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -66,8 +46,18 @@ const Sendnotifications = () => {
         body
       );
       if (res.status === 200) {
+        const uniqueId = uuidv4();
+        const channelsCollection = collection(firestore, "notifications");
+        const docRef = await addDoc(channelsCollection, {
+          _id: uniqueId,
+          title: values.cat,
+          body: values.body,
+          timestamp: serverTimestamp(),
+        });
+
         alert("Sended Successfully", "success");
         setLoading(false);
+        return docRef.id;
       }
     } catch (error) {
       setLoading(false);

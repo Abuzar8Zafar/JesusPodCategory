@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@dnd-kit/core": "^6.1.0",
+    "@dnd-kit/modifiers": "^7.0.0",
+    "@dnd-kit/sortable": "^8.0.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.18",
@@ -27,6 +30,7 @@
     "react-bootstrap": "^2.10.2",
     "react-data-table-component": "^7.5.4",
     "react-dom": "^18.3.1",
+    "react-draggable-list": "^4.2.1",
     "react-elfsight-widget": "^1.1.1",
     "react-feather": "^2.0.10",
     "react-google-autocomplete": "^2.7.3",
