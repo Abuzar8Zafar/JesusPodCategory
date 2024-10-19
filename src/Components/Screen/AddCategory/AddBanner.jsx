@@ -1,25 +1,16 @@
 import { React, useEffect, useState } from "react";
-import { Form, Spinner, Table } from "react-bootstrap";
-import { Formik, Field } from "formik";
-import * as Yup from "yup";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Form, Spinner } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import CustomSnackBar from "../../SnackBar/CustomSnackbar";
-import { auth, firestore, storage } from "../../Firebase/Config";
+import { firestore, storage } from "../../Firebase/Config";
 import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { Input as InputStrap } from "reactstrap";
 import { v4 as uuidv4 } from "uuid";
-import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-} from "firebase/firestore";
+import { addDoc, collection, getDocs } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import DataTable from "react-data-table-component";
-import ImageLoader from "../../ImageLoader/ImageLoader";
 import { Checkbox } from "antd";
+import axios from "axios";
+
 const AddBanner = () => {
   const navigation = useNavigate();
 
@@ -116,33 +107,28 @@ const AddBanner = () => {
     });
   };
 
-  const uploadVideo = (videoFile) => {
+  const uploadVideo = async (videoFile) => {
     if (!videoFile) return;
-
     setloadinguploadVideo(true);
+    const formData = new FormData();
+    formData.append("video", videoFile);
 
-    const currentDate = new Date();
-    const uniqueFileName = `${currentDate.getTime()}_${videoFile?.name}`;
-    const videoRef = ref(storage, `UserVideos/${uniqueFileName}`);
-
-    uploadBytes(videoRef, videoFile)
-      .then((snapshot) => {
-        getDownloadURL(snapshot.ref)
-          .then((url) => {
-            console.log("Video URL:", url);
-            showSnackbar("Video Added Successfully", "success");
-            setvideoUrl(url);
-            setloadinguploadVideo(false);
-          })
-          .catch((error) => {
-            console.error("Error getting video URL: ", error);
-            setloadinguploadVideo(false);
-          });
-      })
-      .catch((error) => {
-        console.error("Error uploading video: ", error);
-        setloadinguploadVideo(false);
-      });
+    try {
+      const res = await axios.post(
+        "https://pushnotinode.onrender.com/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      setvideoUrl(res.data?.video);
+      setloadinguploadVideo(false);
+    } catch (error) {
+      console.error(error);
+      setloadinguploadVideo(false);
+    }
   };
 
   const SelectImage = (e) => {
