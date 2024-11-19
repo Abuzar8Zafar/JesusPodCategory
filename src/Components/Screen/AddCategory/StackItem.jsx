@@ -294,7 +294,7 @@ const StackItem = ({ item }) => {
                     </option>
                     <option value="Global">Global</option>
                     <option value="Espanol">Espanol</option>
-                    <option value="Nigerian">Nigerian</option>
+                    <option value="Nigeria">Nigeria</option>
                   </Form.Select>
                   {touched.type && errors.type && (
                     <div className="errorMsg">{errors.type}</div>
