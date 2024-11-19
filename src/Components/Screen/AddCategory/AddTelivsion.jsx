@@ -1,27 +1,65 @@
 /* eslint-disable no-empty-pattern */
 /* eslint-disable no-unused-vars */
-import { Formik } from "formik";
-import { React, useState } from "react";
-import { Form, Spinner } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
+import { React, useEffect, useState } from "react";
+import { Form, Spinner, Table } from "react-bootstrap";
+import { Formik, Field } from "formik";
 import * as Yup from "yup";
+import closeEye from "../../../assets/icon/close_eye.svg";
+import openEye from "../../../assets/icon/open_eye.svg";
+import { NavLink, useNavigate } from "react-router-dom";
 import CustomSnackBar from "../../SnackBar/CustomSnackbar";
+// import { setToken } from "../../../store/reducer/AuthConfig";
+import { ToastMessage } from "../../../utils/ToastMessage";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, firestore, storage } from "../../Firebase/Config";
+import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { Input as InputStrap } from "reactstrap";
 import { v4 as uuidv4 } from "uuid";
-import fileavatar from "../../../assets/images/profileavatar.jpg";
-import { firestore, storage } from "../../Firebase/Config";
 
-import { addDoc, collection } from "firebase/firestore";
+import Snackbar, { SnackbarOrigin } from "@mui/material/Snackbar";
+
+import { message } from "antd";
+
+import { useDispatch } from "react-redux";
+import {
+  setAuthenticated,
+  setToken,
+  setUser,
+} from "../../../Redux/Slices/AuthSlice";
+import { getSingleDoc } from "../../Firebase/FirbaseService";
+import {
+  addDoc,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+} from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-const AddBook = () => {
+import DataTable from "react-data-table-component";
+import ImageLoader from "../../ImageLoader/ImageLoader";
+const AddTelivsion = () => {
   const navigation = useNavigate();
+  // const [state, setState] = React.useState({
+  //   open: false,
+  //   vertical: "top",
+  //   horizontal: "center",
+  // });
+
+  const [inputType, setInputType] = useState("password");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+  const [Cat, setCat] = useState([]);
   const [profileImage, setProfileImage] = useState("");
   const [SelectedImg, setSelectedImg] = useState("");
+  const [Chanalsdata, setChanalsdata] = useState([]);
+  const [channelLoading, setChannelLoading] = useState(false);
   const [loadingupload, setloadingupload] = useState(false);
+
+  // snackbar
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
@@ -34,15 +72,13 @@ const AddBook = () => {
 
   const initialValues = {
     title: "",
-    name: "",
-    type: "",
     url: "",
+    type: "",
   };
 
   const validationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
-    name: Yup.string().required("Name is required"),
-    url: Yup.string().required("Url is required"),
+    url: Yup.string().required("Feed url is required"),
     type: Yup.string().required("Type is required"),
   });
 
@@ -52,7 +88,7 @@ const AddBook = () => {
 
     const currentDate = new Date();
     const uniqueFileName = `${currentDate.getTime()}_${courseFile?.name}`;
-    const imageRef = ref(storage, `BookImages/${uniqueFileName}`);
+    const imageRef = ref(storage, `UserImages/${uniqueFileName}`);
     uploadBytes(imageRef, courseFile).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
         showSnackbar("Image Added Sucessfully", "success");
@@ -83,28 +119,30 @@ const AddBook = () => {
     try {
       const uniqueId = uuidv4();
       // Reference to the 'channels' collection
-      const channelsCollection = collection(firestore, "Books");
+      const channelsCollection = collection(firestore, "Telivision");
 
       // Add a new document with the channel details, including the category object
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
         title: value?.title,
-        name: value?.name,
         imageUrl: profileImage,
         url: value?.url,
+        sub: [],
+        download: [],
+        star: [],
         type: value?.type,
       });
 
-      navigation("/BookList");
+      navigation("/TelivisionList");
 
-      showSnackbar("Book Added Sucessfully", "success");
+      showSnackbar("Telivsion Added Sucessfully", "success");
 
       setLoading(false);
 
       return docRef.id;
     } catch (error) {
       setLoading(false);
-      console.error("Error adding book:", error);
+      console.error("Error adding channel:", error);
       throw error;
     }
   };
@@ -157,17 +195,18 @@ const AddBook = () => {
                   <div className="errorMsg">{errors.title}</div>
                 )}
 
-                <Form.Label className="lableHead mt-3">Add Name</Form.Label>
-
+                <Form.Label className="lableHead mt-3">
+                  Add Telivision Url
+                </Form.Label>
                 <Form.Control
                   className="radius_12 "
-                  placeholder="Name"
-                  name="name"
-                  value={values.name}
+                  placeholder="Url"
+                  name="url"
+                  value={values.url}
                   onChange={handleChange}
                 />
-                {touched.name && errors.name && (
-                  <div className="errorMsg">{errors.name}</div>
+                {touched.url && errors.url && (
+                  <div className="errorMsg">{errors.url}</div>
                 )}
 
                 <Form.Label className="lableHead mt-3">Select Type</Form.Label>
@@ -187,18 +226,6 @@ const AddBook = () => {
                 </Form.Select>
                 {touched.type && errors.type && (
                   <div className="errorMsg">{errors.type}</div>
-                )}
-
-                <Form.Label className="lableHead mt-3">Add Book Url</Form.Label>
-                <Form.Control
-                  className="radius_12 "
-                  placeholder="Url"
-                  name="url"
-                  value={values.url}
-                  onChange={handleChange}
-                />
-                {touched.url && errors.url && (
-                  <div className="errorMsg">{errors.url}</div>
                 )}
               </Form.Group>
 
@@ -238,7 +265,7 @@ const AddBook = () => {
                             width: "100px",
                             height: "100px",
                             objectFit: "cover",
-                            borderRadius: "0%",
+                            borderRadius: "50%",
                             position: "relative",
                           }}
                           className="object-cover"
@@ -297,4 +324,4 @@ const AddBook = () => {
   );
 };
 
-export default AddBook;
+export default AddTelivsion;

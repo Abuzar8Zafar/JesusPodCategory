@@ -97,12 +97,14 @@ const AddCat = () => {
     cat: "",
     title: "",
     url: "",
+    type: "",
   };
 
   const validationSchema = Yup.object().shape({
     cat: Yup.string().required("Category name is required"),
     title: Yup.string().required("Title is required"),
     url: Yup.string().required("Feed url is required"),
+    type: Yup.string().required("Type is required"),
   });
 
   useEffect(() => {
@@ -167,6 +169,7 @@ const AddCat = () => {
         url: value?.url,
         category: categoryData, // Including the full category object
         sub: [],
+        type: value?.type,
         download: [],
         star: [],
       });
@@ -272,6 +275,24 @@ const AddCat = () => {
                 )}
               </Form.Group>
 
+              <Form.Label className="lableHead mt-3">Select Type</Form.Label>
+              <Form.Select
+                aria-label="Default select example"
+                className="radius_12"
+                name="type"
+                value={values.type}
+                onChange={handleChange}
+              >
+                <option value="" disabled>
+                  Select Type
+                </option>
+                <option value="Global">Global</option>
+                <option value="Espanol">Espanol</option>
+                <option value="Nigerians">Nigerians</option>
+              </Form.Select>
+              {touched.type && errors.type && (
+                <div className="errorMsg">{errors.type}</div>
+              )}
               <div className="d-flex " style={{ flexDirection: "column" }}>
                 <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
                 <div>
@@ -335,7 +356,6 @@ const AddCat = () => {
                   />
                 </div>
               </div>
-
               <div className="d-flex flex-column w-50">
                 <button
                   disabled={loading}

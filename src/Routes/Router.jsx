@@ -16,6 +16,10 @@ import ChannelList from "../Components/Screen/AddCategory/ChannelList";
 import AddBook from "../Components/Screen/AddCategory/AddBook";
 import BookList from "../Components/Screen/AddCategory/BookList";
 import Sendnotifications from "../Components/Screen/AddCategory/Sendnotifications";
+import AddVideoBanner from "../Components/Screen/AddCategory/AddVideoBanner";
+import VideoBannerslist from "../Components/Screen/AddCategory/VideoBannersList";
+import AddTelivsion from "../Components/Screen/AddCategory/AddTelivsion";
+import TelivsionList from "../Components/Screen/AddCategory/TelivisionList";
 
 const Home = lazy(() => import("../Components/Screen/Home/index"));
 const Auth = lazy(() => import("../Components/Screen/Auth/Auth"));
@@ -75,6 +79,10 @@ const Router = () => {
           element: isAuthenticated ? <AddBanner /> : <Navigate to="/" />,
         },
         {
+          path: "/AdVideobanners",
+          element: isAuthenticated ? <AddVideoBanner /> : <Navigate to="/" />,
+        },
+        {
           path: "/AddBlogsCat",
           element: isAuthenticated ? <AddblogCategory /> : <Navigate to="/" />,
         },
@@ -91,6 +99,10 @@ const Router = () => {
           element: isAuthenticated ? <Bannerlist /> : <Navigate to="/" />,
         },
         {
+          path: "/VideoBannerslist",
+          element: isAuthenticated ? <VideoBannerslist /> : <Navigate to="/" />,
+        },
+        {
           path: "/AddChannels",
           element: isAuthenticated ? <AddChannels /> : <Navigate to="/" />,
         },
@@ -105,6 +117,14 @@ const Router = () => {
         {
           path: "/BookList",
           element: isAuthenticated ? <BookList /> : <Navigate to="/" />,
+        },
+        {
+          path: "/AddTelivsion",
+          element: isAuthenticated ? <AddTelivsion /> : <Navigate to="/" />,
+        },
+        {
+          path: "/TelivisionList",
+          element: isAuthenticated ? <TelivsionList /> : <Navigate to="/" />,
         },
         {
           path: "/Sendnotifications",

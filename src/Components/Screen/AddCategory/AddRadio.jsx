@@ -74,12 +74,14 @@ const AddRadio = () => {
     title: "",
     category: "",
     url: "",
+    type: "",
   };
 
   const validationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     category: Yup.string().required("Category is required"),
     url: Yup.string().required("Feed url is required"),
+    type: Yup.string().required("Type is required"),
   });
 
   const uploadImage = (courseFile) => {
@@ -118,27 +120,21 @@ const AddRadio = () => {
     setLoading(true);
     try {
       const uniqueId = uuidv4();
-      // Reference to the 'channels' collection
       const channelsCollection = collection(firestore, "Radio");
-
-      // Add a new document with the channel details, including the category object
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
         title: value?.title,
         category: value?.category,
+        type: value?.type,
         imageUrl: profileImage,
         url: value?.url,
         sub: [],
         download: [],
         star: [],
       });
-
       navigation("/RadioList");
-
       showSnackbar("Podcast Added Sucessfully", "success");
-
       setLoading(false);
-
       return docRef.id;
     } catch (error) {
       setLoading(false);
@@ -206,6 +202,25 @@ const AddRadio = () => {
                 />
                 {touched.category && errors.category && (
                   <div className="errorMsg">{errors.category}</div>
+                )}
+
+                <Form.Label className="lableHead mt-3">Select Type</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  className="radius_12"
+                  name="type"
+                  value={values.type}
+                  onChange={handleChange}
+                >
+                  <option value="" disabled>
+                    Select Type
+                  </option>
+                  <option value="Global">Global</option>
+                  <option value="Espanol">Espanol</option>
+                  <option value="Nigerian">Nigerian</option>
+                </Form.Select>
+                {touched.type && errors.type && (
+                  <div className="errorMsg">{errors.type}</div>
                 )}
 
                 <Form.Label className="lableHead mt-3">
@@ -289,7 +304,7 @@ const AddRadio = () => {
 
               <div className="d-flex flex-column w-50">
                 <button
-                  disabled={loading}
+                  disabled={loading || loadingupload}
                   className={`loginBtn mt-3 ${loading ? "disbalebtn" : ""}`}
                 >
                   {loading ? (

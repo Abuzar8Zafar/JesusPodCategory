@@ -12,7 +12,7 @@ import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Modal } from "antd";
 
-const StackItem = ({ item }) => {
+const SlackItem5 = ({ item }) => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -48,21 +48,17 @@ const StackItem = ({ item }) => {
 
   const initialValues = {
     title: item?.title,
-    category: item?.category,
     url: item?.url,
-    type: item?.type,
   };
 
   const validationSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
-    category: Yup.string().required("Category is required"),
     url: Yup.string().required("Feed url is required"),
-    type: Yup.string().required("Type is required"),
   });
 
   const handleDelete = async (id) => {
     try {
-      const channelRef = collection(firestore, "Radio");
+      const channelRef = collection(firestore, "Telivision");
       await deleteDoc(doc(channelRef, id));
       // After deletion, refresh data
       // getChannelsWithCategories();
@@ -112,17 +108,16 @@ const StackItem = ({ item }) => {
     setLoading(true);
     try {
       // Reference to the 'Radio' collection
-      const radioCollection = collection(firestore, "Radio");
+      const radioCollection = collection(firestore, "Telivision");
 
       let docRef;
 
       if (RowID) {
         // Update the existing document in the 'Radio' collection
-        docRef = doc(firestore, "Radio", RowID);
+        docRef = doc(firestore, "Telivision", RowID);
         await updateDoc(docRef, {
           title: values?.title, // Update title
           imageUrl: profileImage, // Update imageUrl
-          category: values?.category,
           url: values?.url, // Update url
           sub: [], // Update sub array
           download: [], // Update download array
@@ -130,7 +125,7 @@ const StackItem = ({ item }) => {
           // No category field
         });
         setEditmodal(false);
-        showSnackbar("Podcast Updated Successfully", "success");
+        showSnackbar("Telivision Updated Successfully", "success");
       }
 
       return docRef.id;
@@ -251,22 +246,7 @@ const StackItem = ({ item }) => {
                   )}
 
                   <Form.Label className="lableHead mt-3">
-                    Add Category
-                  </Form.Label>
-
-                  <Form.Control
-                    className="radius_12 "
-                    placeholder="Category"
-                    name="category"
-                    value={values.category}
-                    onChange={handleChange}
-                  />
-                  {touched.category && errors.category && (
-                    <div className="errorMsg">{errors.category}</div>
-                  )}
-
-                  <Form.Label className="lableHead mt-3">
-                    Add Feed Url
+                    Add Telivision Url
                   </Form.Label>
                   <Form.Control
                     className="radius_12 "
@@ -277,27 +257,6 @@ const StackItem = ({ item }) => {
                   />
                   {touched.url && errors.url && (
                     <div className="errorMsg">{errors.url}</div>
-                  )}
-
-                  <Form.Label className="lableHead mt-3">
-                    Select Type
-                  </Form.Label>
-                  <Form.Select
-                    aria-label="Default select example"
-                    className="radius_12"
-                    name="type"
-                    value={values.type}
-                    onChange={handleChange}
-                  >
-                    <option value="" disabled>
-                      Select Type
-                    </option>
-                    <option value="Global">Global</option>
-                    <option value="Espanol">Espanol</option>
-                    <option value="Nigerian">Nigerian</option>
-                  </Form.Select>
-                  {touched.type && errors.type && (
-                    <div className="errorMsg">{errors.type}</div>
                   )}
                 </Form.Group>
 
@@ -396,4 +355,4 @@ const StackItem = ({ item }) => {
     </>
   );
 };
-export default StackItem;
+export default SlackItem5;

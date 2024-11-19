@@ -12,7 +12,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Checkbox } from "antd";
 import axios from "axios";
 
-const AddBanner = () => {
+const AddVideoBanner = () => {
   const navigation = useNavigate();
 
   const [inputType, setInputType] = useState("password");
@@ -54,29 +54,6 @@ const AddBanner = () => {
     setPromoteUrl(e.target.value); // Update the state with the new input value
   };
 
-  const getCategories = async () => {
-    try {
-      // Reference to the 'category' collection
-      const categoryCollection = collection(firestore, "category");
-
-      // Fetch all documents in the collection
-      const categorySnapshot = await getDocs(categoryCollection);
-
-      // Extract data from each document
-      const categories = categorySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      // Log and return the categories
-      setCat(categories);
-      return categories;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw error;
-    }
-  };
-
   // snackbar
 
   const handleSnackbarClose = () => {
@@ -87,10 +64,6 @@ const AddBanner = () => {
     setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
-
-  useEffect(() => {
-    getCategories();
-  }, []);
 
   const uploadImage = (courseFile) => {
     if (!courseFile) return;
@@ -166,7 +139,10 @@ const AddBanner = () => {
     try {
       const uniqueId = uuidv4();
 
-      const channelsCollection = collection(firestore, "BannersCollection");
+      const channelsCollection = collection(
+        firestore,
+        "VideoBannersCollection"
+      );
 
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
@@ -178,7 +154,7 @@ const AddBanner = () => {
         type: type,
       });
 
-      navigation("/Bannerlist");
+      navigation("/VideoBannerslist");
 
       showSnackbar("Podcast Added Sucessfully", "success");
 
@@ -208,7 +184,7 @@ const AddBanner = () => {
           <Form.Label className="lableHead">Add Banner</Form.Label>
         </Form.Group>
 
-        <div className="d-flex" style={{ flexDirection: "column" }}>
+        <div className="d-flex " style={{ flexDirection: "column" }}>
           <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
           <div>
             <label
@@ -303,7 +279,7 @@ const AddBanner = () => {
             </option>
             <option value="Global">Global</option>
             <option value="Espanol">Espanol</option>
-            <option value="Nigerian">Nigerian</option>
+            <option value="Nigerians">Nigerians</option>
           </Form.Select>
         </Form.Group>
 
@@ -436,4 +412,4 @@ const AddBanner = () => {
   );
 };
 
-export default AddBanner;
+export default AddVideoBanner;

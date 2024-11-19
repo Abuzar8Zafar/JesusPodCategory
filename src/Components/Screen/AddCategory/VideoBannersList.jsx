@@ -39,11 +39,11 @@ import { v4 as uuidv4 } from "uuid";
 import { Formik, Field } from "formik";
 import * as Yup from "yup";
 import CustomSnackbar from "../../SnackBar/CustomSnackbar";
-import StackItem3 from "./SlackItem3";
+import StackItem4 from "./SlackItem4";
 import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-const Bannerlist = () => {
+const VideoBannerslist = () => {
   const [channelLoading, setChannelLoading] = useState(false);
   const [Chanalsdata, setChanalsdata] = useState([]);
   const [Editmodal, setEditmodal] = useState(false);
@@ -94,7 +94,7 @@ const Bannerlist = () => {
 
     try {
       items.forEach((item, index) => {
-        const itemRef = doc(firestore, "BannersCollection", item.id);
+        const itemRef = doc(firestore, "VideoBannersCollection", item.id);
         batch.update(itemRef, { order: index + 1 });
       });
 
@@ -165,7 +165,10 @@ const Bannerlist = () => {
   const getChannelsWithCategories = async () => {
     setChannelLoading(true);
     try {
-      const channelsCollection = collection(firestore, "BannersCollection");
+      const channelsCollection = collection(
+        firestore,
+        "VideoBannersCollection"
+      );
       const channelsSnapshot = await getDocs(channelsCollection);
       const channels = channelsSnapshot.docs
         .map((doc) => ({
@@ -201,7 +204,7 @@ const Bannerlist = () => {
 
   const handleDelete = async (id) => {
     try {
-      const channelRef = collection(firestore, "BannersCollection");
+      const channelRef = collection(firestore, "VideoBannersCollection");
       await deleteDoc(doc(channelRef, id));
       // After deletion, refresh data
       getChannelsWithCategories();
@@ -216,7 +219,10 @@ const Bannerlist = () => {
       // Fetch the category object by categoryId
 
       // Reference to the 'channels' collection
-      const channelsCollection = collection(firestore, "BannersCollection");
+      const channelsCollection = collection(
+        firestore,
+        "VideoBannersCollection"
+      );
 
       let docRef;
 
@@ -346,7 +352,7 @@ const Bannerlist = () => {
                 strategy={verticalListSortingStrategy}
               >
                 {Chanalsdata.map((item, index) => (
-                  <StackItem3 key={item?._id} item={item} />
+                  <StackItem4 key={item?._id} item={item} />
                 ))}
               </SortableContext>
             </ul>
@@ -357,4 +363,4 @@ const Bannerlist = () => {
   );
 };
 
-export default Bannerlist;
+export default VideoBannerslist;

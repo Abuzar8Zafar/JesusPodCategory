@@ -1,6 +1,14 @@
+/* eslint-disable no-loop-func */
 // firebaseFunctions.js
 import { firestore, auth } from "./Config";
-import { doc, getDoc, addDoc, collection } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  addDoc,
+  collection,
+  updateDoc,
+  getDocs,
+} from "firebase/firestore";
 
 export const saveDoc = async (uid, data, collection) => {
   try {
@@ -114,3 +122,28 @@ export const checkUserExist = async (email) => {
     return false;
   }
 };
+
+export async function addGlobalTypeToAllCollections() {
+  // List all your collection names manually
+  const collectionNames = ["Newchannels"];
+
+  for (const collectionName of collectionNames) {
+    const collectionRef = collection(firestore, collectionName);
+    const snapshot = await getDocs(collectionRef);
+
+    snapshot.forEach(async (docSnapshot) => {
+      const docData = docSnapshot.data();
+
+      // Check if type is already "Global"
+      if (docData.type !== "Global") {
+        const docRef = doc(firestore, collectionName, docSnapshot.id);
+        await updateDoc(docRef, { type: "Global" });
+        console.log(
+          `Updated document ${docSnapshot.id} in collection ${collectionName}`
+        );
+      }
+    });
+  }
+
+  console.log('Added "type: Global" to all collections.');
+}

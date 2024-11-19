@@ -27,7 +27,10 @@ import {
   setToken,
   setUser,
 } from "../../../Redux/Slices/AuthSlice";
-import { getSingleDoc } from "../../Firebase/FirbaseService";
+import {
+  addGlobalTypeToAllCollections,
+  getSingleDoc,
+} from "../../Firebase/FirbaseService";
 import {
   addDoc,
   collection,
@@ -95,12 +98,50 @@ const AddChannels = () => {
   const initialValues = {
     name: "",
     url: "",
+    type: "",
   };
 
   const validationSchema = Yup.object().shape({
     name: Yup.string().required("Channel name is required"),
     url: Yup.string().required("Channel url is required"),
+    type: Yup.string().required("Type is required"),
   });
+
+  const uploadImage = (courseFile) => {
+    if (!courseFile) return;
+    setloadingupload(true);
+
+    const currentDate = new Date();
+    const uniqueFileName = `${currentDate.getTime()}_${courseFile?.name}`;
+    const imageRef = ref(storage, `BookImages/${uniqueFileName}`);
+    uploadBytes(imageRef, courseFile).then((snapshot) => {
+      getDownloadURL(snapshot.ref).then((url) => {
+        showSnackbar("Image Added Sucessfully", "success");
+        setProfileImage(url);
+        setloadingupload(false);
+      });
+    });
+  };
+
+  // const handleUpdate = async () => {
+  //   const res = await addGlobalTypeToAllCollections();
+  // };
+
+  const SelectImage = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setSelectedImg(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setSelectedImg(null);
+    }
+    if (file) {
+      uploadImage(file);
+    }
+  };
 
   useEffect(() => {
     getCategories();
@@ -110,10 +151,12 @@ const AddChannels = () => {
     setLoading(true);
     try {
       const response = await axios.post(
-        "https://addchannel-53ifvdv3fa-uc.a.run.app", // Replace with your actual function URL
+        "https://addchannel2-53ifvdv3fa-uc.a.run.app", // Replace with your actual function URL
         {
           name: value?.name,
           channelLink: value?.url,
+          image: profileImage,
+          type: value?.type,
         }
       );
 
@@ -176,7 +219,27 @@ const AddChannels = () => {
                 {touched.name && errors.name && (
                   <div className="errorMsg">{errors.name}</div>
                 )}
+
+                <Form.Label className="lableHead mt-3">Select Type</Form.Label>
+                <Form.Select
+                  aria-label="Default select example"
+                  className="radius_12"
+                  name="type"
+                  value={values.type}
+                  onChange={handleChange}
+                >
+                  <option value="" disabled>
+                    Select Type
+                  </option>
+                  <option value="Global">Global</option>
+                  <option value="Espanol">Espanol</option>
+                  <option value="Nigerian">Nigerian</option>
+                </Form.Select>
+                {touched.type && errors.type && (
+                  <div className="errorMsg">{errors.type}</div>
+                )}
               </Form.Group>
+
               <Form.Group
                 className="mb-2 hideFocus2"
                 controlId="formGroupEmail"
@@ -195,6 +258,70 @@ const AddChannels = () => {
                   <div className="errorMsg">{errors.url}</div>
                 )}
               </Form.Group>
+
+              <div className="d-flex " style={{ flexDirection: "column" }}>
+                <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
+                <div>
+                  <label
+                    style={{ cursor: "pointer", position: "relative" }}
+                    htmlFor="fileInput"
+                    className="cursor-pointer"
+                  >
+                    {loadingupload && (
+                      <Spinner
+                        style={{
+                          width: "18px",
+                          height: "18px",
+                          marginTop: "3px",
+                          borderWidth: "0.15em",
+                          position: "absolute",
+                          top: "1.5rem",
+                          right: "2rem",
+                          zIndex: "99999",
+                          color: "red",
+                        }}
+                        animation="border"
+                        role="status"
+                      >
+                        <span className="visually-hidden">Loading...</span>
+                      </Spinner>
+                    )}
+                    {profileImage ? (
+                      <>
+                        <img
+                          src={profileImage}
+                          alt="Preview"
+                          style={{
+                            width: "100px",
+                            height: "100px",
+                            objectFit: "cover",
+                            borderRadius: "0%",
+                            position: "relative",
+                          }}
+                          className="object-cover"
+                        />
+                      </>
+                    ) : (
+                      <div className="border radius_50 flex justify-content-center items-center">
+                        <img
+                          src={fileavatar}
+                          alt="Camera Icon"
+                          width={80}
+                          height={80}
+                        />
+                      </div>
+                    )}
+                  </label>
+
+                  <InputStrap
+                    type="file"
+                    // required
+                    id="fileInput"
+                    className="visually-hidden"
+                    onChange={SelectImage}
+                  />
+                </div>
+              </div>
 
               <div className="d-flex flex-column w-50">
                 <button

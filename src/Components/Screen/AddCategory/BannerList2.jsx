@@ -4,7 +4,6 @@ import { Spinner } from "react-bootstrap";
 import { Form, Table } from "react-bootstrap";
 import DataTable from "react-data-table-component";
 import ImageLoader from "../../ImageLoader/ImageLoader";
-import { writeBatch } from "firebase/firestore";
 import {
   addDoc,
   collection,
@@ -15,22 +14,6 @@ import {
   deleteDoc,
   updateDoc,
 } from "firebase/firestore";
-
-import {
-  closestCenter,
-  DndContext,
-  PointerSensor,
-  useSensor,
-} from "@dnd-kit/core";
-import {
-  restrictToFirstScrollableAncestor,
-  restrictToVerticalAxis,
-} from "@dnd-kit/modifiers";
-import {
-  arrayMove,
-  SortableContext,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { Input as InputStrap } from "reactstrap";
 
 import { auth, firestore, storage } from "../../Firebase/Config";
@@ -39,7 +22,7 @@ import { v4 as uuidv4 } from "uuid";
 import { Formik, Field } from "formik";
 import * as Yup from "yup";
 import CustomSnackbar from "../../SnackBar/CustomSnackbar";
-import StackItem3 from "./SlackItem3";
+
 import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
@@ -60,75 +43,30 @@ const Bannerlist = () => {
   const [Rowdata, setRowdata] = useState("");
   const [loadingupload, setloadingupload] = useState(false);
 
-  const sensors = [
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 5,
-      },
-    }),
-  ];
-
-  const handleDragEnd = async (event) => {
-    const { active, over } = event;
-
-    console.log("ACTIVE, OVER ==> ", active, over);
-
-    if (active.id !== over.id) {
-      setChanalsdata((items) => {
-        const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over.id);
-
-        // Reorder the array
-        const reorderedItems = arrayMove(items, oldIndex, newIndex);
-
-        // Update Firestore with new order
-        updateAllItems(reorderedItems);
-
-        return reorderedItems;
-      });
-    }
-  };
-
-  const updateAllItems = async (items) => {
-    const batch = writeBatch(firestore);
-
-    try {
-      items.forEach((item, index) => {
-        const itemRef = doc(firestore, "BannersCollection", item.id);
-        batch.update(itemRef, { order: index + 1 });
-      });
-
-      await batch.commit();
-      console.log("All items updated successfully in Firestore!");
-
-      // Re-fetch data after updating
-      await getChannelsWithCategories(); // Re-fetch data to reflect updates
-    } catch (error) {
-      console.error("Error updating items in Firestore:", error);
-    }
-  };
-
   const getCategories = async () => {
-    // try {
-    //   // Reference to the 'category' collection
-    //   const categoryCollection = collection(
-    //     firestore,
-    //     "BlogCategoryCollection"
-    //   );
-    //   // Fetch all documents in the collection
-    //   const categorySnapshot = await getDocs(categoryCollection);
-    //   // Extract data from each document
-    //   const categories = categorySnapshot.docs.map((doc) => ({
-    //     id: doc.id,
-    //     ...doc.data(),
-    //   }));
-    //   // Log and return the categories
-    //   setCat(categories);
-    //   return categories;
-    // } catch (error) {
-    //   console.error("Error fetching categories:", error);
-    //   throw error;
-    // }
+    try {
+      // Reference to the 'category' collection
+      const categoryCollection = collection(
+        firestore,
+        "BlogCategoryCollection"
+      );
+
+      // Fetch all documents in the collection
+      const categorySnapshot = await getDocs(categoryCollection);
+
+      // Extract data from each document
+      const categories = categorySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Log and return the categories
+      setCat(categories);
+      return categories;
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+      throw error;
+    }
   };
 
   const uploadImage = (courseFile) => {
@@ -167,12 +105,10 @@ const Bannerlist = () => {
     try {
       const channelsCollection = collection(firestore, "BannersCollection");
       const channelsSnapshot = await getDocs(channelsCollection);
-      const channels = channelsSnapshot.docs
-        .map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }))
-        .sort((a, b) => a.order - b.order);
+      const channels = channelsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
       console.log(channels);
 
       setChanalsdata(channels);
@@ -314,6 +250,105 @@ const Bannerlist = () => {
 
   return (
     <>
+      <CustomSnackbar
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={handleSnackbarClose}
+      />
+      <Modal footer={false} open={Editmodal} centered onCancel={handleCancel}>
+        <section className="formHead">
+          <div className="d-flex " style={{ flexDirection: "column" }}>
+            <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
+            <div>
+              <label
+                style={{ cursor: "pointer", position: "relative" }}
+                htmlFor="fileInput"
+                className="cursor-pointer"
+              >
+                {loadingupload && (
+                  <Spinner
+                    style={{
+                      width: "18px",
+                      height: "18px",
+                      marginTop: "3px",
+                      borderWidth: "0.15em",
+                      position: "absolute",
+                      top: "2rem",
+                      right: "2.5rem",
+                      zIndex: "99999",
+                      color: "white",
+                    }}
+                    animation="border"
+                    role="status"
+                  >
+                    <span className="visually-hidden">Loading...</span>
+                  </Spinner>
+                )}
+                {profileImage ? (
+                  <>
+                    <img
+                      src={profileImage}
+                      alt="Preview"
+                      style={{
+                        width: "100px",
+                        height: "100px",
+                        objectFit: "cover",
+                        borderRadius: "50%",
+                        position: "relative",
+                      }}
+                      className="object-cover"
+                    />
+                  </>
+                ) : (
+                  <div className="border radius_50 flex justify-content-center items-center">
+                    <img
+                      src={fileavatar}
+                      alt="Camera Icon"
+                      width={80}
+                      height={80}
+                    />
+                  </div>
+                )}
+              </label>
+
+              <InputStrap
+                type="file"
+                // required
+                id="fileInput"
+                className="visually-hidden"
+                onChange={SelectImage}
+              />
+            </div>
+          </div>
+
+          <div className="d-flex flex-column w-50">
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className={`loginBtn mt-3 ${loading ? "disbalebtn" : ""}`}
+            >
+              {loading ? (
+                <Spinner
+                  style={{
+                    width: "18px",
+                    height: "18px",
+                    marginTop: "3px",
+                    borderWidth: "0.15em",
+                  }}
+                  animation="border"
+                  role="status"
+                >
+                  <span className="visually-hidden">Loading...</span>
+                </Spinner>
+              ) : (
+                "Submit"
+              )}
+            </button>
+          </div>
+        </section>
+      </Modal>
+
       {channelLoading ? (
         <div className="text-center">
           <Spinner
@@ -330,28 +365,7 @@ const Bannerlist = () => {
           </Spinner>
         </div>
       ) : (
-        <>
-          <DndContext
-            modifiers={[
-              restrictToFirstScrollableAncestor,
-              restrictToVerticalAxis,
-            ]}
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragEnd={handleDragEnd}
-          >
-            <ul className="stack-group">
-              <SortableContext
-                items={Chanalsdata}
-                strategy={verticalListSortingStrategy}
-              >
-                {Chanalsdata.map((item, index) => (
-                  <StackItem3 key={item?._id} item={item} />
-                ))}
-              </SortableContext>
-            </ul>
-          </DndContext>
-        </>
+        <DataTable columns={columns} data={Chanalsdata} pagination />
       )}
     </>
   );

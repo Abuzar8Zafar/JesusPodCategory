@@ -1,338 +1,192 @@
+/* eslint-disable no-undef */
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
-import { Form, Table } from "react-bootstrap";
-import DataTable from "react-data-table-component";
+
+import { collection, doc, getDocs } from "firebase/firestore";
+
+import { firestore } from "../../Firebase/Config";
+import { writeBatch } from "firebase/firestore";
 import axios from "axios";
-import ImageLoader from "../../ImageLoader/ImageLoader";
+
 import {
-  addDoc,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  setDoc,
-  deleteDoc,
-  updateDoc,
-} from "firebase/firestore";
-import { Input as InputStrap } from "reactstrap";
+  closestCenter,
+  DndContext,
+  PointerSensor,
+  useSensor,
+} from "@dnd-kit/core";
+import {
+  restrictToFirstScrollableAncestor,
+  restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import StackItem from "./StackItem";
+import StackItem2 from "./SlackItem2";
 
-import { auth, firestore, storage } from "../../Firebase/Config";
-import { Modal } from "antd";
-import { v4 as uuidv4 } from "uuid";
-import { Formik, Field } from "formik";
-import * as Yup from "yup";
-import CustomSnackbar from "../../SnackBar/CustomSnackbar";
-
-import fileavatar from "../../../assets/images/profileavatar.jpg";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-
-const ChannelList = () => {
-  const [channelLoading, setChannelLoading] = useState(false);
+const RadioList = () => {
   const [Chanalsdata, setChanalsdata] = useState([]);
-  const [Editmodal, setEditmodal] = useState(false);
-  const [inputType, setInputType] = useState("password");
-  const [passwordVisible, setPasswordVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
-  const [Cat, setCat] = useState([]);
-  const [RowID, setRowID] = useState("");
-  const [profileImage, setProfileImage] = useState("");
-  const [SelectedImg, setSelectedImg] = useState("");
-  const [Rowdata, setRowdata] = useState("");
-  const [loadingupload, setloadingupload] = useState(false);
-  const [channel, setChannel] = useState([]);
+  const [ChanalsSortedData, setChanalsSortedData] = useState([]);
+  const [channelLoading, setChannelLoading] = useState(true);
+  const [sortValue, setSortValue] = useState("asc");
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const getCategories = async () => {
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const sensors = [
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5,
+      },
+    }),
+  ];
+
+  const getChannelsWithCategories = async () => {
+    setChannelLoading(true);
     try {
-      const response = await axios.post(
-        "https://getchannels-53ifvdv3fa-uc.a.run.app"
-      );
-      console.log("Channels data:", response.data?.channels);
-      setChannel(response.data?.channels);
+      const channelsCollection = collection(firestore, "channels");
+      const channelsSnapshot = await getDocs(channelsCollection);
+      const channels = channelsSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .sort((a, b) => a.order - b.order); // Sort by the order field
+      console.log("CHANNELS ARE ===> ", channels);
+      setChanalsSortedData(channels);
+      setChanalsdata(channels);
+      setChannelLoading(false);
+      // const response = await axios.post(
+      //   "https://getchannels-53ifvdv3fa-uc.a.run.app"
+      // );
+      // console.log("Channels data:", response.data?.channels);
+      // setChanalsdata(response.data?.channels);
+      // setChannelLoading(false);
     } catch (error) {
       console.error("Error getting channels:", error);
+      setChannelLoading(false);
+      throw error;
     }
   };
 
-  const getChannelNames = () => {
-    return channel.find((item) => {
-      return item.name == Rowdata?.name;
-    });
-  };
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
 
-  const getChannelUrls = () => {
-    console.log(
-      "URLS: ",
-      channel.find((item) => {
-        return item.channelLink == Rowdata?.channelLink;
-      })
-    );
-    return channel.find((item) => {
-      return item.channelLink == Rowdata?.channelLink;
-    })?.channelLink;
-  };
+    if (active.id !== over.id) {
+      setChanalsdata((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
 
-  const initialValues = {
-    name: getChannelNames(),
-    url: getChannelUrls(),
-    // name: getChannelNames(),
-    // url: getChannelUrls(),
-  };
+        // Reorder the array
+        const reorderedItems = arrayMove(items, oldIndex, newIndex);
 
-  const validationSchema = Yup.object().shape({
-    cat: Yup.string().required("Channel name is required"),
-    url: Yup.string().required("Channel url is required"),
-  });
+        // Update Firestore with new order
+        updateAllItems(reorderedItems);
 
-  const handleDelete = async (row) => {
-    try {
-      const response = await axios.post(
-        "https://deletechannel-53ifvdv3fa-uc.a.run.app",
-        {
-          channelName: row?.name,
-        }
-      );
-      console.log("Channel deleted:", response.data);
-      setChannel((pre) => {
-        return pre?.filter((item) => item?.name != row?.name);
+        return reorderedItems;
       });
-    } catch (error) {
-      console.error("Error deleting channel:", error);
     }
-    // try {
-    //   const channelRef = collection(firestore, "BlogCollection");
-    //   await deleteDoc(doc(channelRef, id));
-    //   // After deletion, refresh data
-    //   // getChannelsWithCategories();
-    // } catch (error) {
-    //   console.error("Error deleting channel:", error);
-    // }
   };
 
-  const handleSubmit = async (values) => {
-    setLoading(true);
-    console.log("values are: ");
-    // try {
-    //   // Fetch the category object by categoryId
-    //   const categoryDocRef = doc(
-    //     firestore,
-    //     "BlogCategoryCollection",
-    //     values?.cat
-    //   );
-    //   const categoryDoc = await getDoc(categoryDocRef);
+  const updateAllItems = async (items) => {
+    const batch = writeBatch(firestore);
 
-    //   if (!categoryDoc.exists()) {
-    //     setLoading(false);
-    //     throw new Error("Category not found");
-    //   }
+    try {
+      items.forEach((item, index) => {
+        const itemRef = doc(firestore, "channels", item.id);
+        batch.update(itemRef, { order: index + 1 });
+      });
 
-    //   const categoryData = categoryDoc.data();
+      await batch.commit();
+      console.log("All items updated successfully in Firestore!");
 
-    //   // Reference to the 'channels' collection
-    //   const channelsCollection = collection(firestore, "BlogCollection");
-
-    //   let docRef;
-
-    //   if (RowID) {
-    //     // Update the existing document
-    //     docRef = doc(firestore, "BlogCollection", RowID);
-    //     await updateDoc(docRef, {
-    //       url: values?.url,
-    //       category: categoryData,
-    //       sub: [],
-    //       download: [],
-    //       star: [],
-    //     });
-    //     setEditmodal(false);
-    //     // getChannelsWithCategories();
-    //     showSnackbar("Podcast Updated Successfully", "success");
-    //   }
-
-    //   return docRef.id;
-    // } catch (error) {
-    //   setLoading(false);
-    //   console.error("Error adding or updating channel:", error);
-    //   throw error;
-    // }
+      // Re-fetch data after updating
+      await getChannelsWithCategories(); // Re-fetch data to reflect updates
+    } catch (error) {
+      console.error("Error updating items in Firestore:", error);
+    }
   };
 
-  const showSnackbar = (message, severity) => {
-    setSnackbarMessage(message);
-    setSnackbarSeverity(severity);
-    setSnackbarOpen(true);
+  const handleSortToggle = () => {
+    // Cycle through 1 -> 2 -> 1 when pressed
+    console.log("here");
+    const sortedData = [...ChanalsSortedData].sort((a, b) => {
+      const firstLetterA = a?.name?.charAt(0).toLowerCase();
+      const firstLetterB = b?.name?.charAt(0).toLowerCase();
+
+      if (sortValue === "asc") {
+        return firstLetterA < firstLetterB
+          ? -1
+          : firstLetterA > firstLetterB
+          ? 1
+          : 0;
+      } else {
+        return firstLetterA > firstLetterB
+          ? -1
+          : firstLetterA < firstLetterB
+          ? 1
+          : 0;
+      }
+    });
+    setChanalsSortedData(sortedData);
+    setSortValue((prevValue) => (prevValue === "asc" ? "desc" : "asc"));
   };
 
-  const handleEdit = (row) => {
-    console.log("row is: ", row);
-    setRowdata(row);
-    setRowID(row?.id);
-    setProfileImage(row?.imageUrl);
-    setEditmodal(true);
-  };
+  const SortAscendingIcon = ({ size = 24, color = "black" }) => (
+    <svg
+      width="30"
+      height="30"
+      viewBox="0 0 24 24"
+      fill={color}
+      onClick={handleSortToggle}
+    >
+      <path d="M7 14l5-5 5 5H7z"></path>
+    </svg>
+  );
 
-  const handleCancel = () => {
-    setEditmodal(false);
-  };
+  // Sort Descending Icon (Down Arrow)
+  const SortDescendingIcon = ({ size = 24, color = "black" }) => (
+    <svg
+      width="30"
+      height="30"
+      viewBox="0 0 24 24"
+      fill={color}
+      onClick={handleSortToggle}
+    >
+      <path d="M7 10l5 5 5-5H7z"></path>
+    </svg>
+  );
 
   useEffect(() => {
-    // getChannelsWithCategories();
-    getCategories();
+    getChannelsWithCategories();
   }, []);
 
-  const columns = [
-    {
-      name: "#",
-      selector: (row, index) => index,
-      maxWidth: "7rem",
-      minWidth: "2rem",
-    },
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        const sortedData = Chanalsdata?.filter((item, index) =>
+          item?.name?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+        );
+        setChanalsSortedData(sortedData);
+      } else setChanalsSortedData(Chanalsdata);
+      // const sortedData = Chanalsdata?.filter((item, index) =>
+      //   item?.title?.toLowerCase()?.includes(searchQuery?.toLocaleLowerCase)
+      // );
+      // setChanalsSortedData(sortedData);
+    }, 500);
 
-    {
-      name: "Channel Name",
-      selector: (row) => row?.name,
-      maxWidth: "10rem",
-      minWidth: "7rem",
-    },
-    {
-      name: "Channel Url",
-      selector: (row) => row?.channelLink,
-      maxWidth: "30rem",
-      minWidth: "20rem",
-    },
-    {
-      name: "Actions",
-      cell: (row) => (
-        <>
-          {/* <button
-            className="loginBtn2"
-            style={{ cursor: "pointer", padding: "2px 10px" }}
-            onClick={() => handleEdit(row)}
-          >
-            Edit
-          </button> */}
-          <button
-            className="loginBtn2"
-            style={{ cursor: "pointer", padding: "2px 10px", marginLeft: 20 }}
-            onClick={() => handleDelete(row)}
-          >
-            Delete
-          </button>
-        </>
-      ),
-      maxWidth: "10rem",
-      minWidth: "10rem",
-    },
-  ];
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
+    return () => {
+      clearTimeout(timer); // Clear the timer on cleanup
+    };
+  }, [searchQuery, Chanalsdata]);
 
   return (
     <>
-      <CustomSnackbar
-        open={snackbarOpen}
-        message={snackbarMessage}
-        severity={snackbarSeverity}
-        onClose={handleSnackbarClose}
-      />
-      <Modal footer={false} open={Editmodal} centered onCancel={handleCancel}>
-        <Formik
-          initialValues={initialValues}
-          enableReinitialize={true}
-          validationSchema={validationSchema}
-          onSubmit={(values, { setSubmitting }) => {
-            console.log("here");
-            handleSubmit(values);
-          }}
-        >
-          {({
-            values,
-            errors,
-            touched,
-            handleChange,
-            handleBlur,
-            handleSubmit,
-          }) => (
-            <Form
-              className="formHead"
-              // style={{ width: "40%" }}
-              onSubmit={(event) => {
-                console.log("event is:", event);
-                handleSubmit(event.target);
-              }}
-            >
-              <section>
-                <Form.Group
-                  className="mb-2 hideFocus2"
-                  controlId="formGroupEmail"
-                >
-                  <Form.Label className="lableHead">Eidt Channel</Form.Label>
-
-                  <Form.Select
-                    aria-label="Default select example"
-                    className="radius_12"
-                    name="name"
-                    value={values.name}
-                    onChange={handleChange}
-                  >
-                    {channel.map((item) => (
-                      <option key={item.id} value={item.id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </Form.Select>
-
-                  {touched.name && errors.name && (
-                    <div className="errorMsg">{errors.name}</div>
-                  )}
-
-                  <Form.Label className="lableHead mt-3">
-                    Add Channel Url
-                  </Form.Label>
-                  <Form.Control
-                    className="radius_12 "
-                    placeholder="Url"
-                    name="url"
-                    value={values.url}
-                    onChange={handleChange}
-                  />
-                  {touched.url && errors.url && (
-                    <div className="errorMsg">{errors.url}</div>
-                  )}
-                </Form.Group>
-
-                <div className="d-flex flex-column w-50">
-                  <button
-                    disabled={loading}
-                    className={`loginBtn mt-3 ${loading ? "disbalebtn" : ""}`}
-                  >
-                    {loading ? (
-                      <Spinner
-                        style={{
-                          width: "18px",
-                          height: "18px",
-                          marginTop: "3px",
-                          borderWidth: "0.15em",
-                        }}
-                        animation="border"
-                        role="status"
-                      >
-                        <span className="visually-hidden">Loading...</span>
-                      </Spinner>
-                    ) : (
-                      "Submit"
-                    )}
-                  </button>
-                </div>
-              </section>
-            </Form>
-          )}
-        </Formik>
-      </Modal>
-
       {channelLoading ? (
         <div className="text-center">
           <Spinner
@@ -349,10 +203,45 @@ const ChannelList = () => {
           </Spinner>
         </div>
       ) : (
-        <DataTable columns={columns} data={channel} pagination />
+        <>
+          <div className="cat-input-con">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search for channels"
+              className="cat-input"
+            />
+            {sortValue === "asc" ? (
+              <SortAscendingIcon size={24} color="black" />
+            ) : (
+              <SortDescendingIcon size={24} color="black" />
+            )}
+          </div>
+          <DndContext
+            modifiers={[
+              restrictToFirstScrollableAncestor,
+              restrictToVerticalAxis,
+            ]}
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <ul className="stack-group">
+              <SortableContext
+                items={ChanalsSortedData}
+                strategy={verticalListSortingStrategy}
+              >
+                {ChanalsSortedData.map((item, index) => (
+                  <StackItem2 key={item?._id} item={item} />
+                ))}
+              </SortableContext>
+            </ul>
+          </DndContext>
+        </>
       )}
     </>
   );
 };
 
-export default ChannelList;
+export default RadioList;

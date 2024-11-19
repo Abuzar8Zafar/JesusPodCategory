@@ -11,8 +11,9 @@ import { Input as InputStrap } from "reactstrap";
 import fileavatar from "../../../assets/images/profileavatar.jpg";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { Modal } from "antd";
+import axios from "axios";
 
-const StackItem = ({ item }) => {
+const StackItem2 = ({ item }) => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -34,11 +35,12 @@ const StackItem = ({ item }) => {
   };
 
   const handleEdit = (row) => {
-    console.log(row);
+    console.log(Rowdata?.type);
 
     setRowdata(row);
+
     setRowID(row?.id);
-    setProfileImage(row?.imageUrl);
+    setProfileImage(row?.image);
     setEditmodal(true);
   };
 
@@ -47,28 +49,38 @@ const StackItem = ({ item }) => {
   };
 
   const initialValues = {
-    title: item?.title,
-    category: item?.category,
-    url: item?.url,
-    type: item?.type,
+    name: Rowdata?.name,
+    url: Rowdata?.channelLink,
+    type: Rowdata?.type,
   };
 
   const validationSchema = Yup.object().shape({
-    title: Yup.string().required("Title is required"),
-    category: Yup.string().required("Category is required"),
-    url: Yup.string().required("Feed url is required"),
+    name: Yup.string().required("Channel name is required"),
+    url: Yup.string().required("Channel url is required"),
     type: Yup.string().required("Type is required"),
   });
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (row) => {
     try {
-      const channelRef = collection(firestore, "Radio");
-      await deleteDoc(doc(channelRef, id));
-      // After deletion, refresh data
-      // getChannelsWithCategories();
+      const channelRef = collection(firestore, "channels");
+      await deleteDoc(doc(channelRef, row));
     } catch (error) {
       console.error("Error deleting channel:", error);
     }
+    // try {
+    //   const response = await axios.post(
+    //     "https://deletechannel-53ifvdv3fa-uc.a.run.app",
+    //     {
+    //       channelName: row?.name,
+    //     }
+    //   );
+    //   console.log("Channel deleted:", response.data);
+    //   //   setChannel((pre) => {
+    //   //     return pre?.filter((item) => item?.name != row?.name);
+    //   //   });
+    // } catch (error) {
+    //   console.error("Error deleting channel:", error);
+    // }
   };
 
   const uploadImage = (courseFile) => {
@@ -76,7 +88,7 @@ const StackItem = ({ item }) => {
     setloadingupload(true);
     const currentDate = new Date();
     const uniqueFileName = `${currentDate.getTime()}_${courseFile?.name}`;
-    const imageRef = ref(storage, `UserImages/${uniqueFileName}`);
+    const imageRef = ref(storage, `ChannelsImages/${uniqueFileName}`);
     uploadBytes(imageRef, courseFile).then((snapshot) => {
       getDownloadURL(snapshot.ref).then((url) => {
         showSnackbar("Image Added Sucessfully", "success");
@@ -111,33 +123,36 @@ const StackItem = ({ item }) => {
   const handleSubmit = async (values) => {
     setLoading(true);
     try {
-      // Reference to the 'Radio' collection
-      const radioCollection = collection(firestore, "Radio");
+      const radioCollection = collection(firestore, "channels");
 
       let docRef;
 
+      console.log("ROW ID IS: ", RowID);
+
       if (RowID) {
         // Update the existing document in the 'Radio' collection
-        docRef = doc(firestore, "Radio", RowID);
+        docRef = doc(firestore, "channels", RowID);
+        console.log("docRef is: ", docRef);
         await updateDoc(docRef, {
-          title: values?.title, // Update title
-          imageUrl: profileImage, // Update imageUrl
-          category: values?.category,
-          url: values?.url, // Update url
-          sub: [], // Update sub array
-          download: [], // Update download array
-          star: [], // Update star array
-          // No category field
+          name: values?.name, // Update title
+          channelLink: values?.url, // Update imageUrl
+          image: profileImage,
+          type: values?.type,
         });
-        setEditmodal(false);
-        showSnackbar("Podcast Updated Successfully", "success");
-      }
 
-      return docRef.id;
+        // setEditmodal(false);
+        // setLoading(false);
+        // showSnackbar("Book Updated Successfully", "success");
+      }
+      setLoading(false);
+      setEditmodal(false);
+      // setLoading(false);
+      showSnackbar("Book Updated Successfully", "success");
     } catch (error) {
       setLoading(false);
-      console.error("Error adding or updating channel:", error);
-      throw error;
+      console.error("Error deleting channel:", error);
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -169,21 +184,11 @@ const StackItem = ({ item }) => {
           >
             <ImageLoader
               classes={"tableImg"}
-              imageUrl={item?.imageUrl}
+              imageUrl={item?.image}
               circeltrue={true}
             />
-            <div>{item.title}</div>
-            <div>{item.category}</div>
-            <div
-              style={{
-                whiteSpace: "nowrap",
-                textOverflow: "ellipsis",
-                width: "50%",
-                overflow: "hidden",
-              }}
-            >
-              {item.url}
-            </div>
+            <div>{item.name}</div>
+            <div>{item.channelLink}</div>
           </div>
           <div>
             <button
@@ -237,36 +242,23 @@ const StackItem = ({ item }) => {
                   className="mb-2 hideFocus2"
                   controlId="formGroupEmail"
                 >
-                  <Form.Label className="lableHead mt-3">Add Title</Form.Label>
-
-                  <Form.Control
-                    className="radius_12 "
-                    placeholder="Title"
-                    name="title"
-                    value={values.title}
-                    onChange={handleChange}
-                  />
-                  {touched.title && errors.title && (
-                    <div className="errorMsg">{errors.title}</div>
-                  )}
-
                   <Form.Label className="lableHead mt-3">
-                    Add Category
+                    Add Channel Name
                   </Form.Label>
 
                   <Form.Control
                     className="radius_12 "
-                    placeholder="Category"
-                    name="category"
-                    value={values.category}
+                    placeholder="Title"
+                    name="name"
+                    value={values.name}
                     onChange={handleChange}
                   />
-                  {touched.category && errors.category && (
-                    <div className="errorMsg">{errors.category}</div>
+                  {touched.name && errors.name && (
+                    <div className="errorMsg">{errors.name}</div>
                   )}
 
                   <Form.Label className="lableHead mt-3">
-                    Add Feed Url
+                    Add Channel Url
                   </Form.Label>
                   <Form.Control
                     className="radius_12 "
@@ -274,6 +266,7 @@ const StackItem = ({ item }) => {
                     name="url"
                     value={values.url}
                     onChange={handleChange}
+                    readOnly
                   />
                   {touched.url && errors.url && (
                     <div className="errorMsg">{errors.url}</div>
@@ -396,4 +389,4 @@ const StackItem = ({ item }) => {
     </>
   );
 };
-export default StackItem;
+export default StackItem2;

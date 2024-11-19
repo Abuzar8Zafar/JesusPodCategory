@@ -1,3 +1,5 @@
+/* eslint-disable eqeqeq */
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useState } from "react";
 import { Spinner } from "react-bootstrap";
@@ -29,6 +31,7 @@ import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 const ListCategory = () => {
   const [channelLoading, setChannelLoading] = useState(false);
   const [Chanalsdata, setChanalsdata] = useState([]);
+  const [ChanalsSortedData, setChanalsSortedData] = useState([]);
   const [Editmodal, setEditmodal] = useState(false);
   const [inputType, setInputType] = useState("password");
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -42,6 +45,13 @@ const ListCategory = () => {
   const [SelectedImg, setSelectedImg] = useState("");
   const [Rowdata, setRowdata] = useState("");
   const [loadingupload, setloadingupload] = useState(false);
+  const [titleSortOrder, setTitleSortOrder] = useState(null);
+  const [catSortOrder, setCatSortOrder] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
 
   const getCategories = async () => {
     try {
@@ -75,7 +85,9 @@ const ListCategory = () => {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log("CHANNNELS ======> ", channels?.slice(0, 20));
       setChanalsdata(channels);
+      setChanalsSortedData(channels);
       setChannelLoading(false);
     } catch (error) {
       console.error("Error fetching channels with categories:", error);
@@ -209,6 +221,109 @@ const ListCategory = () => {
     getCategories();
   }, []);
 
+  const handleSort = (title, sortOrder) => {
+    const newSortOrder = sortOrder === "asc" ? "desc" : "asc";
+    if (title == "Title") {
+      const sortedData = [...ChanalsSortedData].sort((a, b) => {
+        const firstLetterA = a.title.charAt(0).toLowerCase();
+        const firstLetterB = b.title.charAt(0).toLowerCase();
+
+        if (newSortOrder === "asc") {
+          return firstLetterA < firstLetterB
+            ? -1
+            : firstLetterA > firstLetterB
+            ? 1
+            : 0;
+        } else {
+          return firstLetterA > firstLetterB
+            ? -1
+            : firstLetterA < firstLetterB
+            ? 1
+            : 0;
+        }
+      });
+      setTitleSortOrder(newSortOrder);
+      // setChanalsdata(sortedData);
+      setChanalsSortedData(sortedData);
+    } else if (title == "Cat Name") {
+      const sortedData = [...ChanalsSortedData].sort((a, b) => {
+        const firstLetterA = a?.category?.name?.charAt(0).toLowerCase();
+        const firstLetterB = b?.category?.name?.charAt(0).toLowerCase();
+
+        console.log(firstLetterA, firstLetterB);
+
+        if (newSortOrder === "asc") {
+          return firstLetterA < firstLetterB
+            ? -1
+            : firstLetterA > firstLetterB
+            ? 1
+            : 0;
+        } else {
+          return firstLetterA > firstLetterB
+            ? -1
+            : firstLetterA < firstLetterB
+            ? 1
+            : 0;
+        }
+      });
+      setCatSortOrder(newSortOrder);
+      // setChanalsdata(sortedData);
+      setChanalsSortedData(sortedData);
+    }
+    // Sorting logic as explained in the previous answer...
+  };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchQuery) {
+        const sortedData = ChanalsSortedData?.filter((item, index) =>
+          item?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+        );
+        setChanalsSortedData(sortedData);
+      } else setChanalsSortedData(Chanalsdata);
+      // const sortedData = Chanalsdata?.filter((item, index) =>
+      //   item?.title?.toLowerCase()?.includes(searchQuery?.toLocaleLowerCase)
+      // );
+      // setChanalsSortedData(sortedData);
+    }, 500);
+
+    return () => {
+      clearTimeout(timer); // Clear the timer on cleanup
+    };
+  }, [searchQuery, Chanalsdata]);
+
+  const NameWithIcon = ({ name, sortOrder }) => {
+    const getSortIcon = () => {
+      if (sortOrder === "asc") {
+        return (
+          <div onClick={() => handleSort(name, sortOrder)}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 14l5-5 5 5H7z" /> {/* Up arrow for ascending */}
+            </svg>
+          </div>
+        );
+      } else if (sortOrder === "desc") {
+        return (
+          <div onClick={() => handleSort(name, sortOrder)}>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M7 10l5 5 5-5H7z" /> {/* Down arrow for descending */}
+            </svg>
+          </div>
+        );
+      }
+      return null; // No icon if no sort order is specified
+    };
+
+    return (
+      <div style={{ display: "flex", alignItems: "center" }}>
+        <span>{name}</span>
+        {sortOrder && (
+          <span style={{ marginLeft: "5px" }}>{getSortIcon()}</span>
+        )}
+      </div>
+    );
+  };
+
   const columns = [
     {
       name: "#",
@@ -229,13 +344,20 @@ const ListCategory = () => {
       minWidth: "2rem",
     },
     {
-      name: "Title",
+      name: <NameWithIcon name="Title" sortOrder={titleSortOrder || "asc"} />,
       selector: (row) => row?.title,
       maxWidth: "10rem",
       minWidth: "4rem",
+      // sortable: true,
+      // sortFunction: (a, b) => {
+      //   const firstLetterA = a.title.charAt(0).toLowerCase();
+      //   const firstLetterB = b.title.charAt(0).toLowerCase();
+      //   if (firstLetterA < firstLetterB) return -1;
+      //   if (firstLetterA > firstLetterB) return 1;
+      // },
     },
     {
-      name: "Cat Name",
+      name: <NameWithIcon name="Cat Name" sortOrder={catSortOrder || "asc"} />,
       selector: (row) => row?.category?.name,
       maxWidth: "7rem",
       minWidth: "2rem",
@@ -472,7 +594,18 @@ const ListCategory = () => {
           </Spinner>
         </div>
       ) : (
-        <DataTable columns={columns} data={Chanalsdata} pagination />
+        <>
+          <div className="cat-input-con">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={handleSearchChange}
+              placeholder="Search for category"
+              className="cat-input"
+            />
+          </div>
+          <DataTable columns={columns} data={ChanalsSortedData} pagination />
+        </>
       )}
     </>
   );

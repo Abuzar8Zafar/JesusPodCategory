@@ -63,7 +63,7 @@ const SideBar = () => {
                       </Nav.Item>
                       <Nav.Item>
                         <NavLink to={"/addCat"}>
-                          <FiPlus /> Add Data
+                          <FiPlus /> Add Podcast
                         </NavLink>
                       </Nav.Item>
                       <Nav.Item>
@@ -108,6 +108,17 @@ const SideBar = () => {
                         </NavLink>
                       </Nav.Item>
                       <Nav.Item>
+                        <NavLink to={"/AdVideobanners"}>
+                          <FiPlus /> Add Video Banners
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/VideoBannerslist"}>
+                          <CiCircleList />
+                          Video Banners list
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
                         <NavLink to={"/addchannels"}>
                           <FiPlus /> Add Channels
                         </NavLink>
@@ -125,6 +136,16 @@ const SideBar = () => {
                       <Nav.Item>
                         <NavLink to={"/BookList"}>
                           <CiCircleList /> Book list
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/AddTelivsion"}>
+                          <FiPlus /> Add Television
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/TelivisionList"}>
+                          <CiCircleList /> Television list
                         </NavLink>
                       </Nav.Item>
                       <Nav.Item>

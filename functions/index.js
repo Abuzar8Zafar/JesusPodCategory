@@ -91,7 +91,7 @@ const getChannelIdForCustom = async (name) => {
 exports.addChannel = onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
-      const { name, channelLink } = req.body;
+      const { name, channelLink, image } = req.body;
       const parts = channelLink.split("/");
       const channelSlug = parts[parts.length - 1];
       var channelId = channelSlug;
@@ -103,7 +103,31 @@ exports.addChannel = onRequest(async (req, res) => {
       }
       const docRef = await db
         .collection("channels")
-        .add({ name, channelLink: channelId });
+        .add({ name, channelLink: channelId, image: image });
+      res.status(201).send("Document added Successfully");
+    } catch (error) {
+      console.error("Error adding channel:", error);
+      res.status(400).send("Error adding channel: " + error.message);
+    }
+  });
+});
+
+exports.addChannel2 = onRequest(async (req, res) => {
+  cors(req, res, async () => {
+    try {
+      const { name, channelLink, image } = req.body;
+      const parts = channelLink.split("/");
+      const channelSlug = parts[parts.length - 1];
+      var channelId = channelSlug;
+      if (channelSlug.includes("@")) {
+        channelId = await getChannelIdForCustom(channelSlug);
+      }
+      if (!name || !channelLink || !channelId) {
+        return res.status(400).send("Name and channelLink are required");
+      }
+      const docRef = await db
+        .collection("channels")
+        .add({ name, channelLink: channelId, image: image });
       res.status(201).send("Document added Successfully");
     } catch (error) {
       console.error("Error adding channel:", error);

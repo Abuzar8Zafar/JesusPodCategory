@@ -709,3 +709,23 @@
   height: 40px;
   border-radius: 50%;
 }
+
+.cat-input-con {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Center vertically if needed */
+  margin-bottom: 40px;
+}
+
+.cat-input {
+  min-width: 30%; /* Minimum width of 40% of the screen */
+  padding: 12px 16px; /* Padding for a comfortable input area */
+  border-radius: 25px; /* Rounded corners */
+  border: 1px solid #ccc; /* Light border color */
+  outline: none; /* Remove default outline on focus */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+  font-size: 16px; /* Adjust font size */
+  transition: all 0.3s ease;
+  align-self: center;
+}
