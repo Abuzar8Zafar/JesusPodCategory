@@ -125,7 +125,7 @@ export const checkUserExist = async (email) => {
 
 export async function addGlobalTypeToAllCollections() {
   // List all your collection names manually
-  const collectionNames = ["Newchannels"];
+  const collectionNames = ["channels"];
 
   for (const collectionName of collectionNames) {
     const collectionRef = collection(firestore, collectionName);

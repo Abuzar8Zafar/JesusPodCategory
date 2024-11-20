@@ -26,7 +26,10 @@ import {
   setToken,
   setUser,
 } from "../../../Redux/Slices/AuthSlice";
-import { getSingleDoc } from "../../Firebase/FirbaseService";
+import {
+  addGlobalTypeToAllCollections,
+  getSingleDoc,
+} from "../../Firebase/FirbaseService";
 import {
   addDoc,
   collection,
@@ -187,6 +190,11 @@ const AddCat = () => {
       throw error;
     }
   };
+
+  // const UpdateChanals = async () => {
+  //   const res = await addGlobalTypeToAllCollections();
+  //   console.log(res);
+  // };
 
   // /
 
@@ -383,6 +391,8 @@ const AddCat = () => {
           </Form>
         )}
       </Formik>
+
+      {/* <button onClick={UpdateChanals}>Update</button> */}
     </>
   );
 };

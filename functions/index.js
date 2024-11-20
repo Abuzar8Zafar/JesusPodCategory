@@ -19,12 +19,12 @@ const axios = require("axios");
 const xml2js = require("xml2js");
 const cors = require("cors")({ origin: true });
 const functions = require("firebase-functions");
-const express = require("express");
+// const express = require("express");
 const bodyParser = require("body-parser");
-const multer = require("multer");
+// const multer = require("multer");
 const path = require("path");
 const mime = require("mime-types");
-const fs = require("fs");
+// const fs = require("fs");
 
 const API_KEY = "AIzaSyDwRHpWwtp7Xk4zol_XYzTPeYFnYXE98Ic";
 
@@ -115,19 +115,19 @@ exports.addChannel = onRequest(async (req, res) => {
 exports.addChannel2 = onRequest(async (req, res) => {
   cors(req, res, async () => {
     try {
-      const { name, channelLink, image } = req.body;
+      const { name, channelLink, image, type } = req.body;
       const parts = channelLink.split("/");
       const channelSlug = parts[parts.length - 1];
       var channelId = channelSlug;
       if (channelSlug.includes("@")) {
         channelId = await getChannelIdForCustom(channelSlug);
       }
-      if (!name || !channelLink || !channelId) {
-        return res.status(400).send("Name and channelLink are required");
+      if (!name || !channelLink || !channelId || !type) {
+        return res.status(400).send("Name,channelLink and type are required");
       }
       const docRef = await db
         .collection("channels")
-        .add({ name, channelLink: channelId, image: image });
+        .add({ name, channelLink: channelId, image: image, type });
       res.status(201).send("Document added Successfully");
     } catch (error) {
       console.error("Error adding channel:", error);
@@ -320,34 +320,34 @@ exports.getPaginatedVideos = onRequest(async (req, res) => {
   });
 });
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    const uploadPath = path.join(__dirname, "/uploads");
-    cb(null, uploadPath);
-  },
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const extension = mime.extension(file.mimetype);
-    const filename = `${timestamp}.${extension}`;
-    cb(null, filename);
-  },
-});
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     const uploadPath = path.join(__dirname, "/uploads");
+//     cb(null, uploadPath);
+//   },
+//   filename: (req, file, cb) => {
+//     const timestamp = Date.now();
+//     const extension = mime.extension(file.mimetype);
+//     const filename = `${timestamp}.${extension}`;
+//     cb(null, filename);
+//   },
+// });
 
-const upload = multer({
-  storage: storage,
-  fileFilter: (req, file, cb) => {
-    const allowedMimes = ["video/mp4", "video/mov", "video/avi", "video/mpeg"];
-    if (allowedMimes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(
-        new Error(
-          "Invalid file type. Only MP4, MOV, AVI, and MPEG formats are allowed."
-        )
-      );
-    }
-  },
-  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB file size limit
-});
+// const upload = multer({
+//   storage: storage,
+//   fileFilter: (req, file, cb) => {
+//     const allowedMimes = ["video/mp4", "video/mov", "video/avi", "video/mpeg"];
+//     if (allowedMimes.includes(file.mimetype)) {
+//       cb(null, true);
+//     } else {
+//       cb(
+//         new Error(
+//           "Invalid file type. Only MP4, MOV, AVI, and MPEG formats are allowed."
+//         )
+//       );
+//     }
+//   },
+//   limits: { fileSize: 100 * 1024 * 1024 }, // 100MB file size limit
+// });
 
 // Upload video endpoint
