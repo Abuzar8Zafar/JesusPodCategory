@@ -296,7 +296,7 @@ const AddCat = () => {
                 </option>
                 <option value="Global">Global</option>
                 <option value="Espanol">Espanol</option>
-                <option value="Nigerians">Nigerians</option>
+                <option value="Nigerians">Nigeria</option>
               </Form.Select>
               {touched.type && errors.type && (
                 <div className="errorMsg">{errors.type}</div>
