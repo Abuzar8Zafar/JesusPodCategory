@@ -10,21 +10,20 @@ const AuthLogin = () => {
 
   return (
     <>
-      <section style={{height:"100vh"}} className="sectionTop">
-        <div style={{height:"100vh"}} className="mainTab00 d-flex align-items-center justify-content-center">
+      <section style={{ height: "100vh" }} className="sectionTop">
+        <div
+          style={{ height: "100vh" }}
+          className="mainTab00 d-flex align-items-center justify-content-center"
+        >
           <section className="bord">
             <div className="d-flex flex-column  align-items-center">
               <img className="logoICon mb-3" src={Logo} alt="" />
               <h5 className="text-center loginsbHead mb-3">
                 Let the stories Begin
               </h5>
-              <div className="googlbtn w-100">
-                <FaGoogle className="googlicon" />
-                Continue with Goggle
-              </div>
+
               <div className="d-flex align-items-center mt-3">
                 <div className="divder00 me-3"></div>
-                <span className="textdiv">Or</span>
                 <div className="divder00 ms-3"></div>
               </div>
               <NavLink
