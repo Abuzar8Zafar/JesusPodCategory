@@ -20,6 +20,8 @@ import AddVideoBanner from "../Components/Screen/AddCategory/AddVideoBanner";
 import VideoBannerslist from "../Components/Screen/AddCategory/VideoBannersList";
 import AddTelivsion from "../Components/Screen/AddCategory/AddTelivsion";
 import TelivsionList from "../Components/Screen/AddCategory/TelivisionList";
+import AddCoutry from "../Components/Screen/AddCategory/Country/AddCoutry";
+import ListCountry from "../Components/Screen/AddCategory/Country/ListCountry";
 
 const Home = lazy(() => import("../Components/Screen/Home/index"));
 const Auth = lazy(() => import("../Components/Screen/Auth/Auth"));
@@ -133,6 +135,15 @@ const Router = () => {
           ) : (
             <Navigate to="/" />
           ),
+        },
+
+        {
+          path: "/AddCoutry",
+          element: isAuthenticated ? <AddCoutry /> : <Navigate to="/" />,
+        },
+        {
+          path: "/ListCountry",
+          element: isAuthenticated ? <ListCountry /> : <Navigate to="/" />,
         },
       ])}
     </Suspense>

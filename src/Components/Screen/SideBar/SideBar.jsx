@@ -66,9 +66,20 @@ const SideBar = () => {
                           <FiPlus /> Add Podcast
                         </NavLink>
                       </Nav.Item>
+
                       <Nav.Item>
                         <NavLink to={"/listCategory"}>
                           <CiCircleList /> List Category
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/AddCoutry"}>
+                          <FiPlus /> Add Country
+                        </NavLink>
+                      </Nav.Item>
+                      <Nav.Item>
+                        <NavLink to={"/ListCountry"}>
+                          <CiCircleList /> List Country
                         </NavLink>
                       </Nav.Item>
                       <Nav.Item>

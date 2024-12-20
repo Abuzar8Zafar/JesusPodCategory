@@ -4,32 +4,13 @@ import { React, useEffect, useState } from "react";
 import { Form, Spinner, Table } from "react-bootstrap";
 import { Formik, Field } from "formik";
 import * as Yup from "yup";
-import closeEye from "../../../assets/icon/close_eye.svg";
-import openEye from "../../../assets/icon/open_eye.svg";
-import { NavLink, useNavigate } from "react-router-dom";
-import CustomSnackBar from "../../SnackBar/CustomSnackbar";
-// import { setToken } from "../../../store/reducer/AuthConfig";
-import { ToastMessage } from "../../../utils/ToastMessage";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, firestore, storage } from "../../Firebase/Config";
-import fileavatar from "../../../assets/images/profileavatar.jpg";
+import { useNavigate } from "react-router-dom";
+import CustomSnackBar from "../../../SnackBar/CustomSnackbar";
+import { auth, firestore, storage } from "../../../Firebase/Config";
+import fileavatar from "../../../../assets/images/profileavatar.jpg";
 import { Input as InputStrap } from "reactstrap";
 import { v4 as uuidv4 } from "uuid";
 
-import Snackbar, { SnackbarOrigin } from "@mui/material/Snackbar";
-
-import { message } from "antd";
-
-import { useDispatch } from "react-redux";
-import {
-  setAuthenticated,
-  setToken,
-  setUser,
-} from "../../../Redux/Slices/AuthSlice";
-import {
-  addGlobalTypeToAllCollections,
-  getSingleDoc,
-} from "../../Firebase/FirbaseService";
 import {
   addDoc,
   collection,
@@ -40,8 +21,7 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import DataTable from "react-data-table-component";
-import ImageLoader from "../../ImageLoader/ImageLoader";
-const AddCat = () => {
+const AddCoutry = () => {
   const navigation = useNavigate();
   // const [state, setState] = React.useState({
   //   open: false,
@@ -62,29 +42,6 @@ const AddCat = () => {
   const [channelLoading, setChannelLoading] = useState(false);
   const [loadingupload, setloadingupload] = useState(false);
 
-  const getCategories = async () => {
-    try {
-      // Reference to the 'category' collection
-      const categoryCollection = collection(firestore, "category");
-
-      // Fetch all documents in the collection
-      const categorySnapshot = await getDocs(categoryCollection);
-
-      // Extract data from each document
-      const categories = categorySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-
-      // Log and return the categories
-      setCat(categories);
-      return categories;
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-      throw error;
-    }
-  };
-
   // snackbar
 
   const handleSnackbarClose = () => {
@@ -97,20 +54,12 @@ const AddCat = () => {
   };
 
   const initialValues = {
-    cat: "",
     title: "",
-    url: "",
   };
 
   const validationSchema = Yup.object().shape({
-    cat: Yup.string().required("Category name is required"),
     title: Yup.string().required("Title is required"),
-    url: Yup.string().required("Feed url is required"),
   });
-
-  useEffect(() => {
-    getCategories();
-  }, []);
 
   const uploadImage = (courseFile) => {
     if (!courseFile) return;
@@ -147,39 +96,16 @@ const AddCat = () => {
   const handleSubmit = async (value) => {
     setLoading(true);
     try {
-      // Fetch the category object by categoryId
-      const categoryDocRef = doc(firestore, "category", value?.cat);
-      const categoryDoc = await getDoc(categoryDocRef);
-
-      if (!categoryDoc.exists()) {
-        setLoading(false);
-        throw new Error("Category not found");
-      }
-
-      const categoryData = categoryDoc.data();
       const uniqueId = uuidv4();
-
-      // Reference to the 'channels' collection
-      const channelsCollection = collection(firestore, "Newchannels");
-
-      // Add a new document with the channel details, including the category object
+      const channelsCollection = collection(firestore, "Countries");
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
         title: value?.title,
         imageUrl: profileImage,
-        url: value?.url,
-        category: categoryData, // Including the full category object
-        sub: [],
-        download: [],
-        star: [],
       });
-
-      navigation("/listCategory");
-
+      navigation("/ListCountry");
       showSnackbar("Podcast Added Sucessfully", "success");
-
       setLoading(false);
-
       return docRef.id;
     } catch (error) {
       setLoading(false);
@@ -187,13 +113,6 @@ const AddCat = () => {
       throw error;
     }
   };
-
-  // const UpdateChanals = async () => {
-  //   const res = await addGlobalTypeToAllCollections();
-  //   console.log(res);
-  // };
-
-  // /
 
   return (
     <>
@@ -228,33 +147,7 @@ const AddCat = () => {
                 className="mb-2 hideFocus2"
                 controlId="formGroupEmail"
               >
-                <Form.Label className="lableHead">Add Category</Form.Label>
-                {/* <Form.Control
-                  className="radius_12"
-                  placeholder="Enter name"
-                  name="cat"
-                  value={values.cat}
-                /> */}
-
-                <Form.Select
-                  aria-label="Default select example"
-                  className="radius_12"
-                  name="cat"
-                  value={values.cat}
-                  onChange={handleChange}
-                >
-                  {Cat.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </Form.Select>
-
-                {touched.cat && errors.cat && (
-                  <div className="errorMsg">{errors.cat}</div>
-                )}
-
-                <Form.Label className="lableHead mt-3">Add Title</Form.Label>
+                <Form.Label className="lableHead mt-3">Country Name</Form.Label>
 
                 <Form.Control
                   className="radius_12 "
@@ -266,22 +159,10 @@ const AddCat = () => {
                 {touched.title && errors.title && (
                   <div className="errorMsg">{errors.title}</div>
                 )}
-
-                <Form.Label className="lableHead mt-3">Add Feed Url</Form.Label>
-                <Form.Control
-                  className="radius_12 "
-                  placeholder="Url"
-                  name="url"
-                  value={values.url}
-                  onChange={handleChange}
-                />
-                {touched.url && errors.url && (
-                  <div className="errorMsg">{errors.url}</div>
-                )}
               </Form.Group>
 
               <div className="d-flex " style={{ flexDirection: "column" }}>
-                <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
+                <h6 className="lableHead mt-2 mb-2">Upload Country Flag</h6>
                 <div>
                   <label
                     style={{ cursor: "pointer", position: "relative" }}
@@ -343,9 +224,10 @@ const AddCat = () => {
                   />
                 </div>
               </div>
+
               <div className="d-flex flex-column w-50">
                 <button
-                  disabled={loading}
+                  disabled={loading || loadingupload}
                   className={`loginBtn mt-3 ${loading ? "disbalebtn" : ""}`}
                 >
                   {loading ? (
@@ -370,10 +252,8 @@ const AddCat = () => {
           </Form>
         )}
       </Formik>
-
-      {/* <button onClick={UpdateChanals}>Update</button> */}
     </>
   );
 };
 
-export default AddCat;
+export default AddCoutry;
