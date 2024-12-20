@@ -57,6 +57,7 @@ const AddChannels = () => {
   const [Chanalsdata, setChanalsdata] = useState([]);
   const [channelLoading, setChannelLoading] = useState(false);
   const [loadingupload, setloadingupload] = useState(false);
+  const [FalgType, setFalgType] = useState([]);
 
   const getCategories = async () => {
     try {
@@ -106,6 +107,28 @@ const AddChannels = () => {
     url: Yup.string().required("Channel url is required"),
     type: Yup.string().required("Type is required"),
   });
+
+  const getChannelsWithCategories = async () => {
+    try {
+      const channelsCollection = collection(firestore, "Countries");
+      const channelsSnapshot = await getDocs(channelsCollection);
+      const channels = channelsSnapshot.docs
+        .map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }))
+        .sort((a, b) => a.order - b.order);
+
+      setFalgType(channels);
+    } catch (error) {
+      console.error("Error fetching channels with categories:", error);
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    getChannelsWithCategories();
+  }, []);
 
   const uploadImage = (courseFile) => {
     if (!courseFile) return;
@@ -231,9 +254,11 @@ const AddChannels = () => {
                   <option value="" disabled>
                     Select Type
                   </option>
-                  <option value="Global">Global</option>
-                  <option value="Espanol">Espanol</option>
-                  <option value="Nigeria">Nigeria</option>
+                  {FalgType?.map((item) => (
+                    <>
+                      <option value={item.title}>{item.title}</option>
+                    </>
+                  ))}
                 </Form.Select>
                 {touched.type && errors.type && (
                   <div className="errorMsg">{errors.type}</div>

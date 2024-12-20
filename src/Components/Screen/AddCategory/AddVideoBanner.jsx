@@ -151,7 +151,6 @@ const AddVideoBanner = () => {
         PromoteUrl: checked ? handVideoLink : PromoteUrl,
         download: [],
         star: [],
-        type: type,
       });
 
       navigation("/VideoBannerslist");
@@ -262,25 +261,6 @@ const AddVideoBanner = () => {
             // value={values.cat}
             // onChange={handleChange}
           />
-
-          <Form.Label className="lableHead mt-3">Select Type</Form.Label>
-          <Form.Select
-            aria-label="Default select example"
-            className="radius_12"
-            name="type"
-            // value={values.type}
-            // onChange={handleChange}
-            value={type}
-            onChange={handleTypeChange}
-            required // Make the select field required
-          >
-            <option value="" disabled>
-              Select Type
-            </option>
-            <option value="Global">Global</option>
-            <option value="Espanol">Espanol</option>
-            <option value="Nigerians">Nigerians</option>
-          </Form.Select>
         </Form.Group>
 
         <div className="d-flex " style={{ flexDirection: "column" }}>

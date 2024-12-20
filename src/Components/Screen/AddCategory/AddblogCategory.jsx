@@ -79,12 +79,10 @@ const AddblogCategory = () => {
 
   const initialValues = {
     cat: "",
-    type: "",
   };
 
   const validationSchema = Yup.object().shape({
     cat: Yup.string().required("Category name is required"),
-    type: Yup.string().required("Type is required"),
   });
 
   // handle submit
@@ -101,7 +99,6 @@ const AddblogCategory = () => {
       // Add a new document with a generated ID
       const docRef = await addDoc(categoryCollection, {
         name: value.cat,
-        type: value?.type,
       });
       showSnackbar("Added Sucessfully", "success");
       // Log the ID of the new document
@@ -160,25 +157,6 @@ const AddblogCategory = () => {
                 />
                 {touched.cat && errors.cat && (
                   <div className="errorMsg">{errors.cat}</div>
-                )}
-
-                <Form.Label className="lableHead mt-3">Select Type</Form.Label>
-                <Form.Select
-                  aria-label="Default select example"
-                  className="radius_12"
-                  name="type"
-                  value={values.type}
-                  onChange={handleChange}
-                >
-                  <option value="" disabled>
-                    Select Type
-                  </option>
-                  <option value="Global">Global</option>
-                  <option value="Espanol">Espanol</option>
-                  <option value="Nigeria">Nigeria</option>
-                </Form.Select>
-                {touched.type && errors.type && (
-                  <div className="errorMsg">{errors.type}</div>
                 )}
               </Form.Group>
 

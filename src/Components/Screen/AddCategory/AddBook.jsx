@@ -35,7 +35,6 @@ const AddBook = () => {
   const initialValues = {
     title: "",
     name: "",
-    type: "",
     url: "",
   };
 
@@ -43,7 +42,6 @@ const AddBook = () => {
     title: Yup.string().required("Title is required"),
     name: Yup.string().required("Name is required"),
     url: Yup.string().required("Url is required"),
-    type: Yup.string().required("Type is required"),
   });
 
   const uploadImage = (courseFile) => {
@@ -168,25 +166,6 @@ const AddBook = () => {
                 />
                 {touched.name && errors.name && (
                   <div className="errorMsg">{errors.name}</div>
-                )}
-
-                <Form.Label className="lableHead mt-3">Select Type</Form.Label>
-                <Form.Select
-                  aria-label="Default select example"
-                  className="radius_12"
-                  name="type"
-                  value={values.type}
-                  onChange={handleChange}
-                >
-                  <option value="" disabled>
-                    Select Type
-                  </option>
-                  <option value="Global">Global</option>
-                  <option value="Espanol">Espanol</option>
-                  <option value="Nigeria">Nigeria</option>
-                </Form.Select>
-                {touched.type && errors.type && (
-                  <div className="errorMsg">{errors.type}</div>
                 )}
 
                 <Form.Label className="lableHead mt-3">Add Book Url</Form.Label>
