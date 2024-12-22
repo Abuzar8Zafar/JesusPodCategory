@@ -5,7 +5,9 @@
       "namespace": "android_app",
       "package_name": "com.jesuspod.app",
       "sha256_cert_fingerprints": [
-        "b8:ee:4e:bd:63:9d:f4:e7:0f:17:d8:c5:24:63:f7:8f:9a:28:97:77:b4:80:ff:d9:c5:28:43:68:4d:f3:1f:8f"
+        "b8:ee:4e:bd:63:9d:f4:e7:0f:17:d8:c5:24:63:f7:8f:9a:28:97:77:b4:80:ff:d9:c5:28:43:68:4d:f3:1f:8f",
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C",
+        "48:90:8D:0E:02:89:6B:13:D1:05:0A:74:1E:E3:CF:36:5F:1D:6B:4F:26:28:5C:9B:E9:74:3A:6B:80:42:83:A0"
       ]
     }
   }
