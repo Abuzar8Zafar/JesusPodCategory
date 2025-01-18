@@ -136,6 +136,8 @@ const ListCategory = () => {
     cat: getCategoryIDByName(Rowdata?.category?.name),
     title: Rowdata?.title,
     url: Rowdata?.url,
+    feature: Rowdata?.feature, // Set the initial value for the switch
+
   };
 
   const validationSchema = Yup.object().shape({
@@ -484,6 +486,14 @@ const ListCategory = () => {
                     <div className="errorMsg">{errors.url}</div>
                   )}
                 </Form.Group>
+                <Form.Check
+                  type="switch"
+                  name="feature"
+                  id="custom-switch"
+                  label="Feature this Podcast"
+                  checked={values.feature} 
+                  onChange={handleChange} 
+                />
 
                 <div className="d-flex " style={{ flexDirection: "column" }}>
                   <h6 className="lableHead mt-2 mb-2">Upload Image</h6>

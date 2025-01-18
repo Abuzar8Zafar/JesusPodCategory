@@ -729,3 +729,20 @@
   transition: all 0.3s ease;
   align-self: center;
 }
+
+
+
+.form-check-input:checked{
+background-color: #c80000 !important;
+  border-color: #c80000 !important;
+}
+
+.form-check-input{
+  /* border : none !important; */
+  outline:  none !important;
+}
+
+.form-check-input:focus{
+  border-color: none !important;
+  box-shadow: none !important;
+}

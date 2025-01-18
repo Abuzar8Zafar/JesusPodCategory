@@ -100,6 +100,7 @@ const AddCat = () => {
     cat: "",
     title: "",
     url: "",
+    feature: false, // Set the initial value for the switch
   };
 
   const validationSchema = Yup.object().shape({
@@ -145,9 +146,9 @@ const AddCat = () => {
   };
 
   const handleSubmit = async (value) => {
+
     setLoading(true);
     try {
-      // Fetch the category object by categoryId
       const categoryDocRef = doc(firestore, "category", value?.cat);
       const categoryDoc = await getDoc(categoryDocRef);
 
@@ -159,19 +160,18 @@ const AddCat = () => {
       const categoryData = categoryDoc.data();
       const uniqueId = uuidv4();
 
-      // Reference to the 'channels' collection
       const channelsCollection = collection(firestore, "Newchannels");
 
-      // Add a new document with the channel details, including the category object
       const docRef = await addDoc(channelsCollection, {
         _id: uniqueId,
         title: value?.title,
         imageUrl: profileImage,
         url: value?.url,
-        category: categoryData, // Including the full category object
+        category: categoryData,
         sub: [],
         download: [],
         star: [],
+        feature: value?.feature,
       });
 
       navigation("/listCategory");
@@ -206,7 +206,7 @@ const AddCat = () => {
       <Formik
         initialValues={initialValues}
         validationSchema={validationSchema}
-        onSubmit={(values, { setSubmitting }) => {
+        onSubmit={(values ,{ setSubmitting }) => {
           handleSubmit(values);
         }}
       >
@@ -217,6 +217,7 @@ const AddCat = () => {
           handleChange,
           handleBlur,
           handleSubmit,
+          
         }) => (
           <Form
             className="formHead"
@@ -229,12 +230,7 @@ const AddCat = () => {
                 controlId="formGroupEmail"
               >
                 <Form.Label className="lableHead">Add Category</Form.Label>
-                {/* <Form.Control
-                  className="radius_12"
-                  placeholder="Enter name"
-                  name="cat"
-                  value={values.cat}
-                /> */}
+                
 
                 <Form.Select
                   aria-label="Default select example"
@@ -279,6 +275,15 @@ const AddCat = () => {
                   <div className="errorMsg">{errors.url}</div>
                 )}
               </Form.Group>
+
+              <Form.Check
+                type="switch"
+                name="feature"
+                id="custom-switch"
+                label="Feature this Podcast"
+                checked={values.feature} // Controlled by Formik
+                onChange={handleChange} // Directly use Formik's handleChange
+              />
 
               <div className="d-flex " style={{ flexDirection: "column" }}>
                 <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
