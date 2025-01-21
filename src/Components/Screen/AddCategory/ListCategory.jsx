@@ -139,8 +139,6 @@ const ListCategory = () => {
     feature: Rowdata?.feature, // Set the initial value for the switch
   };
 
-  
-
   const validationSchema = Yup.object().shape({
     cat: Yup.string().required("Category name is required"),
     title: Yup.string().required("Title is required"),
@@ -159,6 +157,7 @@ const ListCategory = () => {
   };
 
   const handleSubmit = async (values) => {
+
     setLoading(true);
     try {
       // Fetch the category object by categoryId
@@ -171,8 +170,6 @@ const ListCategory = () => {
       }
 
       const categoryData = categoryDoc.data();
-
-      // Reference to the 'channels' collection
       const channelsCollection = collection(firestore, "Newchannels");
 
       let docRef;
@@ -184,8 +181,7 @@ const ListCategory = () => {
           title: values?.title,
           imageUrl: profileImage,
           url: values?.url,
-          category: categoryData, // Including the full category object
-          // Assuming you want to update these fields as well
+          category: categoryData,
           sub: [],
           download: [],
           star: [],
@@ -352,13 +348,6 @@ const ListCategory = () => {
       selector: (row) => row?.title,
       maxWidth: "10rem",
       minWidth: "4rem",
-      // sortable: true,
-      // sortFunction: (a, b) => {
-      //   const firstLetterA = a.title.charAt(0).toLowerCase();
-      //   const firstLetterB = b.title.charAt(0).toLowerCase();
-      //   if (firstLetterA < firstLetterB) return -1;
-      //   if (firstLetterA > firstLetterB) return 1;
-      // },
     },
     {
       name: <NameWithIcon name="Cat Name" sortOrder={catSortOrder || "asc"} />,
@@ -430,6 +419,7 @@ const ListCategory = () => {
             handleChange,
             handleBlur,
             handleSubmit,
+            setFieldValue,
           }) => (
             <Form
               className="formHead"
@@ -494,8 +484,8 @@ const ListCategory = () => {
                   name="feature"
                   id="custom-switch"
                   label="Feature this Podcast"
-                  checked={values.feature} 
-                  onChange={handleChange} 
+                  checked={values.feature}
+                  onChange={(e) => setFieldValue("feature", e.target.checked)}
                 />
 
                 <div className="d-flex " style={{ flexDirection: "column" }}>

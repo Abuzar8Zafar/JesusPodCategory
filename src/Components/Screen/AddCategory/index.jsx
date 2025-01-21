@@ -64,19 +64,12 @@ const AddCat = () => {
 
   const getCategories = async () => {
     try {
-      // Reference to the 'category' collection
       const categoryCollection = collection(firestore, "category");
-
-      // Fetch all documents in the collection
       const categorySnapshot = await getDocs(categoryCollection);
-
-      // Extract data from each document
       const categories = categorySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      // Log and return the categories
       setCat(categories);
       return categories;
     } catch (error) {
@@ -100,7 +93,7 @@ const AddCat = () => {
     cat: "",
     title: "",
     url: "",
-    feature: false, // Set the initial value for the switch
+    feature: false, 
   };
 
   const validationSchema = Yup.object().shape({
@@ -217,6 +210,7 @@ const AddCat = () => {
           handleChange,
           handleBlur,
           handleSubmit,
+          setFieldValue,
           
         }) => (
           <Form
@@ -282,8 +276,8 @@ const AddCat = () => {
                 id="custom-switch"
                 label="Feature this Podcast"
                 checked={values.feature} // Controlled by Formik
-                onChange={handleChange} // Directly use Formik's handleChange
-              />
+                onChange={(e) => setFieldValue("feature", e.target.checked)}
+                />
 
               <div className="d-flex " style={{ flexDirection: "column" }}>
                 <h6 className="lableHead mt-2 mb-2">Upload Image</h6>
