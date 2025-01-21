@@ -137,8 +137,9 @@ const ListCategory = () => {
     title: Rowdata?.title,
     url: Rowdata?.url,
     feature: Rowdata?.feature, // Set the initial value for the switch
-
   };
+
+  
 
   const validationSchema = Yup.object().shape({
     cat: Yup.string().required("Category name is required"),
@@ -188,6 +189,7 @@ const ListCategory = () => {
           sub: [],
           download: [],
           star: [],
+          feature: values?.feature
         });
         setEditmodal(false);
         showSnackbar("Podcast Updated Successfully", "success");
@@ -486,6 +488,7 @@ const ListCategory = () => {
                     <div className="errorMsg">{errors.url}</div>
                   )}
                 </Form.Group>
+
                 <Form.Check
                   type="switch"
                   name="feature"
