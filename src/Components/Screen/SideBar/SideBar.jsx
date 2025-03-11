@@ -35,8 +35,6 @@ const SideBar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  //
-
   return (
     <>
       {!allPath ? (
@@ -52,6 +50,7 @@ const SideBar = () => {
                   md={3}
                   lg={2}
                   xl={2}
+
                 >
                   <section className="colHead00">
                     <Nav variant="pills" className="flex-column mytabs">

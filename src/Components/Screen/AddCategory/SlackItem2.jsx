@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import ImageLoader from "../../ImageLoader/ImageLoader";
-import { collection, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, updateDoc } from "firebase/firestore";
 import { firestore, storage } from "../../Firebase/Config";
 import { Form, Spinner } from "react-bootstrap";
 import { Formik } from "formik";
@@ -25,6 +25,7 @@ const StackItem2 = ({ item }) => {
   const [RowID, setRowID] = useState("");
   const [profileImage, setProfileImage] = useState("");
   const [Editmodal, setEditmodal] = useState(false);
+    const [FalgType, setFalgType] = useState([]);
 
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: item.id });
@@ -34,6 +35,29 @@ const StackItem2 = ({ item }) => {
     transition,
   };
 
+
+  const getChannelsWithCategories = async () => {
+      try {
+        const channelsCollection = collection(firestore, "Countries");
+        const channelsSnapshot = await getDocs(channelsCollection);
+        const channels = channelsSnapshot.docs
+          .map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          .sort((a, b) => a.order - b.order);
+  
+        setFalgType(channels);
+      } catch (error) {
+        console.error("Error fetching channels with categories:", error);
+        throw error;
+      }
+    };
+    useEffect(() => {
+      getChannelsWithCategories();
+    }, []);
+
+    
   const handleEdit = (row) => {
     console.log(Rowdata?.type);
 
@@ -210,7 +234,7 @@ const StackItem2 = ({ item }) => {
       </li>
 
       <Modal
-        title="Edit Radio"
+        title="Edit Chanel"
         footer={false}
         open={Editmodal}
         centered
@@ -285,9 +309,11 @@ const StackItem2 = ({ item }) => {
                     <option value="" disabled>
                       Select Type
                     </option>
-                    <option value="Global">Global</option>
-                    <option value="Espanol">Espanol</option>
-                    <option value="Nigeria">Nigeria</option>
+                    {FalgType?.map((item) => (
+                      <>
+                        <option value={item.title}>{item.title}</option>
+                      </>
+                    ))}
                   </Form.Select>
                   {touched.type && errors.type && (
                     <div className="errorMsg">{errors.type}</div>
